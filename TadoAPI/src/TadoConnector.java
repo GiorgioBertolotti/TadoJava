@@ -10,7 +10,6 @@ import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class TadoConnector {
@@ -23,6 +22,15 @@ public class TadoConnector {
 	private int zone;
 	private OkHttpClient client;
 	public static final MediaType FORM = MediaType.parse("multipart/form-data");
+
+	public TadoConnector(String username, String password, String clientSecret) {
+		this.username = username;
+		this.password = password;
+		this.clientSecret = clientSecret;
+		client = new OkHttpClient();
+		getBearerTokens();
+		this.homeID = getHomeID();
+	}
 
 	public TadoConnector(String username, String password) {
 		this.username = username;
@@ -49,6 +57,14 @@ public class TadoConnector {
 		this.password = password;
 	}
 
+	public String getBearer() {
+		return bearer;
+	}
+
+	public String getRefreshToken() {
+		return refreshToken;
+	}
+
 	public int getHome() {
 		return homeID;
 	}
@@ -68,6 +84,8 @@ public class TadoConnector {
 	private String getClientSecret() {
 		try {
 			String jsonResponse = doGetRequest("https://my.tado.com/webapp/env.js", null);
+			jsonResponse = jsonResponse.substring(9).trim();
+			jsonResponse = jsonResponse.substring(0, jsonResponse.length() - 1).trim();
 			JSONObject json = new JSONObject(jsonResponse);
 			return json.getJSONObject("config").getJSONObject("oauth").getString("clientSecret");
 		} catch (IOException e) {
@@ -98,7 +116,7 @@ public class TadoConnector {
 		try {
 			Map<String, String> headers = new HashMap<>();
 			headers.put("Authorization", "Bearer " + this.bearer);
-			String jsonResponse = doGetRequest("https://my.tado.com/api/v2/me", headers);
+			String jsonResponse = doGetRequest("https://my.tado.com/api/v1/me", headers);
 			JSONObject json = new JSONObject(jsonResponse);
 			return json.getInt("homeId");
 		} catch (IOException e) {
@@ -122,7 +140,7 @@ public class TadoConnector {
 		for (Map.Entry<String, String> entry : body.entrySet()) {
 			builder.add(entry.getKey(), entry.getValue());
 		}
-		RequestBody formBody = builder.build();
+		FormBody formBody = builder.build();
 		Request request;
 		if (headers != null)
 			request = new Request.Builder().url(url).post(formBody).headers(Headers.of(headers)).build();
