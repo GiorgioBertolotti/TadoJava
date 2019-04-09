@@ -1,7 +1,13 @@
 public class HomeID {
 	public static void main(String[] args) {
-		TadoConnector connector = new TadoConnector("***REMOVED***", "Password123!");
-		System.out.println("Bearer: " + connector.getBearer());
-		System.out.println("Home ID: " + connector.getHome());
+		try {
+			TadoConnector connector = new TadoConnector("***REMOVED***", "Password123!");
+			// connector.setDebug(true);
+			connector.initialize();
+			for (TadoHome home : connector.getHomes())
+				System.out.println("Home ID: " + home.getId());
+		} catch (TadoException e) {
+			e.printStackTrace();
+		}
 	}
 }

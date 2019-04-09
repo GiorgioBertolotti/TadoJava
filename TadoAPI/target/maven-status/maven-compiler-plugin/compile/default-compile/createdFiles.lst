@@ -1,1 +1,6 @@
+TadoException.class
+TadoAddress.class
+TadoContact.class
 TadoConnector.class
+TadoHome.class
+TadoGeolocation.class
