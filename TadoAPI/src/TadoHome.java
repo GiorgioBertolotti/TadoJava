@@ -1,10 +1,5 @@
-import java.io.IOException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import org.json.JSONObject;
 
 public class TadoHome {
 	private int id;
@@ -115,7 +110,7 @@ public class TadoHome {
 	}
 
 	public TadoState getState(TadoConnector connector) throws TadoException {
-		return connector.getState(this.id);
+		return connector.getHomeState(this.id);
 	}
 
 	@Override

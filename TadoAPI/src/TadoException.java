@@ -1,5 +1,5 @@
+@SuppressWarnings("serial")
 public class TadoException extends Exception {
-	private static final long serialVersionUID = 2780775136016500787L;
 	private String code;
 	private String title;
 

@@ -3,6 +3,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -324,23 +325,23 @@ public class TadoConnector {
 		return toReturn;
 	}
 
-	public TadoState getState(TadoHome tadoHome) throws TadoException {
-		return getState(tadoHome.getId());
+	public TadoState getHomeState(TadoHome tadoHome) throws TadoException {
+		return getHomeState(tadoHome.getId());
 	}
 
-	public TadoState getState(int idHome) throws TadoException {
+	public TadoState getHomeState(int idHome) throws TadoException {
 		if (!this.initialized)
 			throw new TadoException("error", "You must initialize the TadoConnector");
-		return _getState(idHome, 0);
+		return _getHomeState(idHome, 0);
 	}
 
-	private TadoState _getState(int idHome, int attempt) throws TadoException {
+	private TadoState _getHomeState(int idHome, int attempt) throws TadoException {
 		TadoState toReturn = null;
 		try {
 			Map<String, String> headers = new HashMap<>();
 			headers.put("Authorization", "Bearer " + this.bearer);
 			String jsonResponse = doGetRequest("https://my.tado.com/api/v2/homes/" + idHome + "/state", headers);
-			debugMessage("getState response: " + jsonResponse);
+			debugMessage("getHomeState response: " + jsonResponse);
 			JSONObject json = new JSONObject(jsonResponse);
 			checkException(json);
 			toReturn = new TadoState(json.optString("presence"));
@@ -351,7 +352,93 @@ public class TadoConnector {
 				throw e;
 			} else {
 				refresh();
-				toReturn = _getState(idHome, attempt + 1);
+				toReturn = _getHomeState(idHome, attempt + 1);
+			}
+		}
+		return toReturn;
+	}
+
+	public TadoZoneState getZoneState(TadoZone tadoZone) throws TadoException {
+		return getZoneState(tadoZone.getHomeId(), tadoZone.getId());
+	}
+
+	public TadoZoneState getZoneState(int idHome, int idZone) throws TadoException {
+		if (!this.initialized)
+			throw new TadoException("error", "You must initialize the TadoConnector");
+		return _getZoneState(idHome, idZone, 0);
+	}
+
+	private TadoZoneState _getZoneState(int idHome, int idZone, int attempt) throws TadoException {
+		TadoZoneState toReturn = null;
+		try {
+			Map<String, String> headers = new HashMap<>();
+			headers.put("Authorization", "Bearer " + this.bearer);
+			String jsonResponse = doGetRequest(
+					"https://my.tado.com/api/v2/homes/" + idHome + "/zones/" + idZone + "/state", headers);
+			debugMessage("getZoneState response: " + jsonResponse);
+			JSONObject json = new JSONObject(jsonResponse);
+			checkException(json);
+			Date geolocationOverrideDisableTime;
+			if (json.optString("geolocationOverrideDisableTime").isEmpty())
+				geolocationOverrideDisableTime = null;
+			else
+				geolocationOverrideDisableTime = Date
+						.from(Instant.parse(json.optString("geolocationOverrideDisableTime")));
+			JSONObject jsonSetting = json.getJSONObject("setting");
+			JSONObject jsonTemperature = jsonSetting.getJSONObject("temperature");
+			TadoTemperature temperature = new TadoTemperature(jsonTemperature.optDouble("celsius"),
+					jsonTemperature.optDouble("fahrenheit"));
+			TadoSetting setting = new TadoSetting(jsonSetting.optString("type"), jsonSetting.optString("power"),
+					temperature);
+			JSONObject jsonScheduleChange = json.optJSONObject("nextScheduleChange");
+			TadoScheduleChange nextScheduleChange = null;
+			if (jsonScheduleChange != null) {
+				Date start = Date.from(Instant.parse(jsonScheduleChange.optString("start")));
+				JSONObject jsonSetting2 = jsonScheduleChange.getJSONObject("setting");
+				JSONObject jsonTemperature2 = jsonSetting2.getJSONObject("temperature");
+				TadoTemperature temperature2 = new TadoTemperature(jsonTemperature2.optDouble("celsius"),
+						jsonTemperature2.optDouble("fahrenheit"));
+				TadoSetting setting2 = new TadoSetting(jsonSetting2.optString("type"), jsonSetting2.optString("power"),
+						temperature2);
+				nextScheduleChange = new TadoScheduleChange(start, setting2);
+			}
+			JSONObject jsonActivityDataPoints = json.optJSONObject("activityDataPoints");
+			List<TadoDataPoint> activityDataPoints = new ArrayList<>();
+			if (jsonActivityDataPoints != null) {
+				Iterator<String> keys = jsonActivityDataPoints.keys();
+				while (keys.hasNext()) {
+					String name = keys.next();
+					JSONObject datapoint = null;
+					if (jsonActivityDataPoints.get(name) instanceof JSONObject) {
+						datapoint = jsonActivityDataPoints.getJSONObject(name);
+					}
+					activityDataPoints.add(new TadoDataPoint(name, datapoint));
+				}
+			}
+			JSONObject jsonSensorDataPoints = json.optJSONObject("sensorDataPoints");
+			List<TadoDataPoint> sensorDataPoints = new ArrayList<>();
+			if (jsonActivityDataPoints != null) {
+				Iterator<String> keys = jsonSensorDataPoints.keys();
+				while (keys.hasNext()) {
+					String name = keys.next();
+					JSONObject datapoint = null;
+					if (jsonSensorDataPoints.get(name) instanceof JSONObject) {
+						datapoint = jsonSensorDataPoints.getJSONObject(name);
+					}
+					sensorDataPoints.add(new TadoDataPoint(name, datapoint));
+				}
+			}
+			toReturn = new TadoZoneState(json.optString("tadoMode"), json.getBoolean("geolocationOverride"),
+					geolocationOverrideDisableTime, setting, nextScheduleChange,
+					json.getJSONObject("link").getString("state"), activityDataPoints, sensorDataPoints);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (TadoException e) {
+			if (attempt > 1) {
+				throw e;
+			} else {
+				refresh();
+				toReturn = _getZoneState(idHome, idZone, attempt + 1);
 			}
 		}
 		return toReturn;

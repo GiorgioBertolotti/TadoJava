@@ -81,6 +81,10 @@ public class TadoZone {
 		this.openWindowDetection = openWindowDetection;
 	}
 
+	public TadoZoneState getZoneState(TadoConnector connector) throws TadoException {
+		return connector.getZoneState(this.homeId, this.id);
+	}
+
 	@Override
 	public String toString() {
 		return "TadoZone [homeId=" + homeId + ", id=" + id + ", name=" + name + ", type=" + type + ", dateCreated="
