@@ -1,4 +1,10 @@
+import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.json.JSONObject;
 
 public class TadoHome {
 	private int id;
@@ -72,6 +78,11 @@ public class TadoHome {
 		return consentGrantSkippable;
 	}
 
+	public TadoHome(int id) {
+		super();
+		this.id = id;
+	}
+
 	public TadoHome(int id, String name) {
 		super();
 		this.id = id;
@@ -97,6 +108,14 @@ public class TadoHome {
 		this.address = address;
 		this.geolocation = geolocation;
 		this.consentGrantSkippable = consentGrantSkippable;
+	}
+
+	public List<TadoZone> getZones(TadoConnector connector) throws TadoException {
+		return connector.getZones(this.id);
+	}
+
+	public TadoState getState(TadoConnector connector) throws TadoException {
+		return connector.getState(this.id);
 	}
 
 	@Override

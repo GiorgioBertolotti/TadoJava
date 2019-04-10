@@ -56,17 +56,6 @@
           <connectionType>connection</connectionType>
         </configuration>
       </plugin>
-      <plugin>
-        <artifactId>maven-release-plugin</artifactId>
-        <version>2.5.1</version>
-        <dependencies>
-          <dependency>
-            <groupId>org.apache.maven.shared</groupId>
-            <artifactId>maven-invoker</artifactId>
-            <version>2.2</version>
-          </dependency>
-        </dependencies>
-      </plugin>
     </plugins>
   </build>
 </project>

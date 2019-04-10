@@ -1,6 +1,7 @@
 # TadoJava
 
-TadoJava is a wrapper for [Tado](https://www.tado.com/en/)'s API written in Java.
+TadoJava is a Java wrapper library for [Tado](https://www.tado.com/en/)'s API.  
+It allows you to control your Tado and get its status.
 
 ## Getting started
 
