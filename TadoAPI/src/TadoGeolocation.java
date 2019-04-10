@@ -15,4 +15,9 @@ public class TadoGeolocation {
 		this.latitude = latitude;
 		this.longitude = longitude;
 	}
+
+	@Override
+	public String toString() {
+		return "TadoGeolocation [latitude=" + latitude + ", longitude=" + longitude + "]";
+	}
 }

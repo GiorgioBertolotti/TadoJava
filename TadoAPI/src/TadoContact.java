@@ -21,4 +21,9 @@ public class TadoContact {
 		this.email = email;
 		this.phone = phone;
 	}
+
+	@Override
+	public String toString() {
+		return "TadoContact [name=" + name + ", email=" + email + ", phone=" + phone + "]";
+	}
 }

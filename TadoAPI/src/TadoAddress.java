@@ -40,4 +40,10 @@ public class TadoAddress {
 		this.state = state;
 		this.country = country;
 	}
+
+	@Override
+	public String toString() {
+		return "TadoAddress [addressLine1=" + addressLine1 + ", addressLine2=" + addressLine2 + ", zipCode=" + zipCode
+				+ ", city=" + city + ", state=" + state + ", country=" + country + "]";
+	}
 }

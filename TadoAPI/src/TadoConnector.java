@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import okhttp3.FormBody;
@@ -225,6 +226,132 @@ public class TadoConnector {
 			} else {
 				refresh();
 				toReturn = _getHome(id, attempt + 1);
+			}
+		}
+		return toReturn;
+	}
+
+	public List<TadoZone> getZones(TadoHome tadoHome) throws TadoException {
+		return getZones(tadoHome.getId());
+	}
+
+	public List<TadoZone> getZones(int idHome) throws TadoException {
+		if (!this.initialized)
+			throw new TadoException("error", "You must initialize the TadoConnector");
+		return _getZones(idHome, 0);
+	}
+
+	private List<TadoZone> _getZones(int idHome, int attempt) throws TadoException {
+		List<TadoZone> toReturn = new ArrayList<>();
+		try {
+			Map<String, String> headers = new HashMap<>();
+			headers.put("Authorization", "Bearer " + this.bearer);
+			String jsonResponse = doGetRequest("https://my.tado.com/api/v2/homes/" + idHome + "/zones", headers);
+			debugMessage("getZones response: " + jsonResponse);
+			try {
+				// IF IT CAN PARSE THE JSONOBJECT IT WILL PROBABLY BE AN EXCEPTION
+				JSONObject json = new JSONObject(jsonResponse);
+				checkException(json);
+			} catch (JSONException e) {
+				// IF IT CANNOT PARSE THE JSONOBJECT IT WILL BE AN ARRAY OF ZONES, WHICH IS THE
+				// EXPECTED RESULT
+				JSONArray jsonArray = new JSONArray(jsonResponse);
+				for (Object obj : jsonArray) {
+					if (obj instanceof JSONObject) {
+						JSONObject jsonZone = (JSONObject) obj;
+						Date dateCreated = Date.from(Instant.parse(jsonZone.optString("dateCreated")));
+						JSONArray jsonDeviceTypes = jsonZone.getJSONArray("deviceTypes");
+						List<String> deviceTypes = new ArrayList<>();
+						for (Object deviceType : jsonDeviceTypes) {
+							if (deviceType instanceof String)
+								deviceTypes.add((String) deviceType);
+						}
+						JSONArray jsonDevices = jsonZone.getJSONArray("devices");
+						List<TadoDevice> devices = new ArrayList<>();
+						for (Object jsonDevice : jsonDevices) {
+							if (jsonDevice instanceof JSONObject) {
+								JSONObject device = (JSONObject) jsonDevice;
+								JSONObject jsonConnectionState = device.getJSONObject("connectionState");
+								Date timestamp = Date.from(Instant.parse(jsonConnectionState.optString("timestamp")));
+								TadoConnectionState connsectionState = new TadoConnectionState(
+										jsonConnectionState.getBoolean("value"), timestamp);
+								JSONArray jsonCapabilities = device.getJSONObject("characteristics")
+										.getJSONArray("capabilities");
+								List<String> capabilities = new ArrayList<>();
+								for (Object capability : jsonCapabilities) {
+									if (capability instanceof String)
+										capabilities.add((String) capability);
+								}
+								JSONArray jsonDuties = device.getJSONArray("duties");
+								List<String> duties = new ArrayList<>();
+								for (Object duty : jsonDuties) {
+									if (duty instanceof String)
+										duties.add((String) duty);
+								}
+								TadoDevice toAdd = new TadoDevice(device.optString("deviceType"),
+										device.optString("serialNo"), device.optString("shortSerialNo"),
+										device.optString("currentFwVersion"), connsectionState, capabilities,
+										device.optString("batteryState"), duties);
+								devices.add(toAdd);
+							}
+						}
+						JSONObject jsonDazzleMode = jsonZone.getJSONObject("dazzleMode");
+						TadoDazzleMode dazzleMode = new TadoDazzleMode(jsonDazzleMode.getBoolean("supported"),
+								jsonDazzleMode.getBoolean("enabled"));
+						JSONObject jsonOpenWindowDetection = jsonZone.getJSONObject("openWindowDetection");
+						TadoOpenWindowDetection openWindowDetection = new TadoOpenWindowDetection(
+								jsonOpenWindowDetection.getBoolean("supported"),
+								jsonOpenWindowDetection.getBoolean("enabled"),
+								jsonOpenWindowDetection.getInt("timeoutInSeconds"));
+						TadoZone zone = new TadoZone(idHome, jsonZone.getInt("id"), jsonZone.optString("name"),
+								jsonZone.optString("type"), dateCreated, deviceTypes, devices,
+								jsonZone.getBoolean("reportAvailable"), jsonZone.getBoolean("supportsDazzle"),
+								jsonZone.getBoolean("dazzleEnabled"), dazzleMode, openWindowDetection);
+						toReturn.add(zone);
+					}
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (TadoException e) {
+			if (attempt > 1) {
+				throw e;
+			} else {
+				refresh();
+				toReturn = _getZones(idHome, attempt + 1);
+			}
+		}
+		return toReturn;
+	}
+
+	public TadoState getState(TadoHome tadoHome) throws TadoException {
+		return getState(tadoHome.getId());
+	}
+
+	public TadoState getState(int idHome) throws TadoException {
+		if (!this.initialized)
+			throw new TadoException("error", "You must initialize the TadoConnector");
+		return _getState(idHome, 0);
+	}
+
+	private TadoState _getState(int idHome, int attempt) throws TadoException {
+		TadoState toReturn = null;
+		try {
+			Map<String, String> headers = new HashMap<>();
+			headers.put("Authorization", "Bearer " + this.bearer);
+			String jsonResponse = doGetRequest("https://my.tado.com/api/v2/homes/" + idHome + "/state", headers);
+			debugMessage("getState response: " + jsonResponse);
+			JSONObject json = new JSONObject(jsonResponse);
+			checkException(json);
+			toReturn = new TadoState(json.optString("presence"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (TadoException e) {
+			if (attempt > 1) {
+				throw e;
+			} else {
+				refresh();
+				toReturn = _getState(idHome, attempt + 1);
 			}
 		}
 		return toReturn;

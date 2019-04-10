@@ -98,4 +98,14 @@ public class TadoHome {
 		this.geolocation = geolocation;
 		this.consentGrantSkippable = consentGrantSkippable;
 	}
+
+	@Override
+	public String toString() {
+		return "TadoHome [id=" + id + ", name=" + name + ", dateTimeZone=" + dateTimeZone + ", dateCreated="
+				+ dateCreated + ", temperatureUnit=" + temperatureUnit + ", installationCompleted="
+				+ installationCompleted + ", simpleSmartScheduleEnabled=" + simpleSmartScheduleEnabled
+				+ ", awayRadiusInMeters=" + awayRadiusInMeters + ", usePreSkillsApps=" + usePreSkillsApps
+				+ ", christmasModeEnabled=" + christmasModeEnabled + ", contactDetails=" + contactDetails + ", address="
+				+ address + ", geolocation=" + geolocation + ", consentGrantSkippable=" + consentGrantSkippable + "]";
+	}
 }
