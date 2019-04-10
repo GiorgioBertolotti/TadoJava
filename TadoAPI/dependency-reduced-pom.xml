@@ -4,14 +4,8 @@
   <groupId>TadoAPI</groupId>
   <artifactId>TadoAPI</artifactId>
   <name>TadoAPI</name>
-  <version>0.02-SNAPSHOT</version>
+  <version>0.4-SNAPSHOT</version>
   <description>Java wrapper for Tado APIs</description>
-  <scm>
-    <connection>scm:git:ssh://git@github.com:GiorgioBertolotti/TadoJava.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com:GiorgioBertolotti/TadoJava.git</developerConnection>
-    <tag>${project.version}</tag>
-    <url>https://github.com/GiorgioBertolotti/TadoJava</url>
-  </scm>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <plugins>
@@ -26,46 +20,6 @@
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
         <version>3.2.1</version>
-      </plugin>
-      <plugin>
-        <artifactId>maven-scm-plugin</artifactId>
-        <version>2.3.2</version>
-        <executions>
-          <execution>
-            <id>tag</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>tag</goal>
-            </goals>
-          </execution>
-        </executions>
-        <dependencies>
-          <dependency>
-            <groupId>org.apache.maven.scm</groupId>
-            <artifactId>maven-scm-provider-gitexe</artifactId>
-            <version>1.11.2</version>
-          </dependency>
-          <dependency>
-            <groupId>org.codehaus.plexus</groupId>
-            <artifactId>plexus-utils</artifactId>
-            <version>3.2.0</version>
-          </dependency>
-        </dependencies>
-        <configuration>
-          <tag>${project.version}</tag>
-          <connectionType>connection</connectionType>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-release-plugin</artifactId>
-        <version>2.5.1</version>
-        <dependencies>
-          <dependency>
-            <groupId>org.apache.maven.shared</groupId>
-            <artifactId>maven-invoker</artifactId>
-            <version>2.2</version>
-          </dependency>
-        </dependencies>
       </plugin>
     </plugins>
   </build>

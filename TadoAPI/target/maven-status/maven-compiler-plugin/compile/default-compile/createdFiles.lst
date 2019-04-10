@@ -1,0 +1,12 @@
+TadoException.class
+TadoOpenWindowDetection.class
+TadoHome.class
+TadoState.class
+TadoDazzleMode.class
+TadoAddress.class
+TadoContact.class
+TadoConnectionState.class
+TadoZone.class
+TadoConnector.class
+TadoDevice.class
+TadoGeolocation.class
