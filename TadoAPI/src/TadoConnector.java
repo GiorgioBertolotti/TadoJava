@@ -50,14 +50,14 @@ public class TadoConnector {
 			client = new OkHttpClient();
 			if (this.clientSecret == null)
 				this.clientSecret = getClientSecret();
-			getBearerTokens();
+			getTokens();
 			this.initialized = true;
 		}
 	}
 
-	public void refresh() {
+	public void refresh() throws TadoException {
 		if (initialized) {
-			// TODO: refreshBearerTokens();
+			refreshTokens();
 		}
 	}
 
@@ -99,13 +99,32 @@ public class TadoConnector {
 		}
 	}
 
-	private void getBearerTokens() throws TadoException {
+	private void getTokens() throws TadoException {
 		Map<String, String> body = new HashMap<>();
 		body.put("client_id", "tado-web-app");
 		body.put("grant_type", "password");
 		body.put("scope", "home.user");
 		body.put("username", this.username);
 		body.put("password", this.password);
+		body.put("client_secret", this.clientSecret);
+		try {
+			String response = doPostRequest("https://auth.tado.com/oauth/token", body, null);
+			debugMessage("getBearerTokens response: " + response);
+			JSONObject json = new JSONObject(response);
+			checkException(json);
+			this.bearer = json.optString("access_token");
+			this.refreshToken = json.optString("refresh_token");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void refreshTokens() throws TadoException {
+		Map<String, String> body = new HashMap<>();
+		body.put("client_id", "tado-web-app");
+		body.put("grant_type", "refresh_token");
+		body.put("scope", "home.user");
+		body.put("refresh_token", this.refreshToken);
 		body.put("client_secret", this.clientSecret);
 		try {
 			String response = doPostRequest("https://auth.tado.com/oauth/token", body, null);
