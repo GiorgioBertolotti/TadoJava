@@ -224,14 +224,14 @@ public class TadoConnector {
 			checkException(json);
 			Date dateCreated = Date.from(Instant.parse(json.optString("dateCreated")));
 			JSONObject jsonContactDetails = json.getJSONObject("contactDetails");
-			TadoContact contactDetails = new TadoContact(jsonContactDetails.optString("name"),
+			ContactDetails contactDetails = new ContactDetails(jsonContactDetails.optString("name"),
 					jsonContactDetails.optString("email"), jsonContactDetails.optString("phone"));
 			JSONObject jsonAddress = json.getJSONObject("address");
-			TadoAddress address = new TadoAddress(jsonAddress.optString("addressLine1"),
-					jsonAddress.optString("addressLine2"), jsonAddress.optString("zipCode"),
-					jsonAddress.optString("city"), jsonAddress.optString("state"), jsonAddress.optString("country"));
+			Address address = new Address(jsonAddress.optString("addressLine1"), jsonAddress.optString("addressLine2"),
+					jsonAddress.optString("zipCode"), jsonAddress.optString("city"), jsonAddress.optString("state"),
+					jsonAddress.optString("country"));
 			JSONObject jsonGeolocation = json.getJSONObject("geolocation");
-			TadoGeolocation geolocation = new TadoGeolocation(jsonGeolocation.optDouble("latitude"),
+			Geolocation geolocation = new Geolocation(jsonGeolocation.optDouble("latitude"),
 					jsonGeolocation.optDouble("longitude"));
 			toReturn = new TadoHome(json.getInt("id"), json.optString("name"), json.optString("dateTimeZone"),
 					dateCreated, json.optString("temperatureUnit"), json.optBoolean("installationCompleted"),
@@ -311,7 +311,7 @@ public class TadoConnector {
 								TadoDevice toAdd = new TadoDevice(device.optString("deviceType"),
 										device.optString("serialNo"), device.optString("shortSerialNo"),
 										device.optString("currentFwVersion"), connsectionState, capabilities,
-										device.optString("batteryState"), duties);
+										device.optBoolean("inPairingMode"), device.optString("batteryState"), duties);
 								devices.add(toAdd);
 							}
 						}
@@ -319,7 +319,7 @@ public class TadoConnector {
 						TadoDazzleMode dazzleMode = new TadoDazzleMode(jsonDazzleMode.getBoolean("supported"),
 								jsonDazzleMode.getBoolean("enabled"));
 						JSONObject jsonOpenWindowDetection = jsonZone.getJSONObject("openWindowDetection");
-						TadoOpenWindowDetection openWindowDetection = new TadoOpenWindowDetection(
+						OpenWindowDetection openWindowDetection = new OpenWindowDetection(
 								jsonOpenWindowDetection.getBoolean("supported"),
 								jsonOpenWindowDetection.getBoolean("enabled"),
 								jsonOpenWindowDetection.getInt("timeoutInSeconds"));
@@ -405,7 +405,7 @@ public class TadoConnector {
 						.from(Instant.parse(json.optString("geolocationOverrideDisableTime")));
 			JSONObject jsonSetting = json.getJSONObject("setting");
 			JSONObject jsonTemperature = jsonSetting.getJSONObject("temperature");
-			TadoTemperature temperature = new TadoTemperature(jsonTemperature.optDouble("celsius"),
+			Temperature temperature = new Temperature(jsonTemperature.optDouble("celsius"),
 					jsonTemperature.optDouble("fahrenheit"));
 			TadoSetting setting = new TadoSetting(jsonSetting.optString("type"), jsonSetting.optString("power"),
 					temperature);
@@ -415,7 +415,7 @@ public class TadoConnector {
 				Date start = Date.from(Instant.parse(jsonScheduleChange.optString("start")));
 				JSONObject jsonSetting2 = jsonScheduleChange.getJSONObject("setting");
 				JSONObject jsonTemperature2 = jsonSetting2.getJSONObject("temperature");
-				TadoTemperature temperature2 = new TadoTemperature(jsonTemperature2.optDouble("celsius"),
+				Temperature temperature2 = new Temperature(jsonTemperature2.optDouble("celsius"),
 						jsonTemperature2.optDouble("fahrenheit"));
 				TadoSetting setting2 = new TadoSetting(jsonSetting2.optString("type"), jsonSetting2.optString("power"),
 						temperature2);
@@ -458,6 +458,189 @@ public class TadoConnector {
 			} else {
 				refresh();
 				toReturn = _getZoneState(idHome, idZone, attempt + 1);
+			}
+		}
+		return toReturn;
+	}
+
+	public TadoWeather getWeather(TadoHome tadoHome) throws TadoException {
+		return getWeather(tadoHome.getId());
+	}
+
+	public TadoWeather getWeather(int idHome) throws TadoException {
+		if (!this.initialized)
+			throw new TadoException("error", "You must initialize the TadoConnector");
+		return _getWeather(idHome, 0);
+	}
+
+	private TadoWeather _getWeather(int idHome, int attempt) throws TadoException {
+		TadoWeather toReturn = null;
+		try {
+			Map<String, String> headers = new HashMap<>();
+			headers.put("Authorization", "Bearer " + this.bearer);
+			String jsonResponse = doGetRequest("https://my.tado.com/api/v2/homes/" + idHome + "/weather", headers);
+			debugMessage("getWeather response: " + jsonResponse);
+			JSONObject json = new JSONObject(jsonResponse);
+			checkException(json);
+			JSONObject jsonSolarIntensity = json.getJSONObject("solarIntensity");
+			SolarIntensity solarIntensity = new SolarIntensity(jsonSolarIntensity.optString("type"),
+					jsonSolarIntensity.optDouble("percentage"),
+					Date.from(Instant.parse(jsonSolarIntensity.optString("timestamp"))));
+			JSONObject jsonOutsideTemperature = json.getJSONObject("outsideTemperature");
+			OutsideTemperature outsideTemperature = new OutsideTemperature(jsonOutsideTemperature.optDouble("celsius"),
+					jsonOutsideTemperature.optDouble("fahrenheit"),
+					Date.from(Instant.parse(jsonOutsideTemperature.optString("timestamp"))),
+					jsonOutsideTemperature.optString("type"),
+					jsonOutsideTemperature.getJSONObject("precision").optDouble("celsius"),
+					jsonOutsideTemperature.getJSONObject("precision").optDouble("fahrenheit"));
+			JSONObject jsonWeatherState = json.getJSONObject("weatherState");
+			WeatherState weatherState = new WeatherState(jsonWeatherState.optString("type"),
+					jsonWeatherState.optString("value"),
+					Date.from(Instant.parse(jsonWeatherState.optString("timestamp"))));
+			toReturn = new TadoWeather(solarIntensity, outsideTemperature, weatherState);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (TadoException e) {
+			if (attempt > 1) {
+				throw e;
+			} else {
+				refresh();
+				toReturn = _getWeather(idHome, attempt + 1);
+			}
+		}
+		return toReturn;
+	}
+
+	public List<TadoDevice> getDevices(TadoHome tadoHome) throws TadoException {
+		return getDevices(tadoHome.getId());
+	}
+
+	public List<TadoDevice> getDevices(int idHome) throws TadoException {
+		if (!this.initialized)
+			throw new TadoException("error", "You must initialize the TadoConnector");
+		return _getDevices(idHome, 0);
+	}
+
+	public List<TadoDevice> _getDevices(int idHome, int attempt) throws TadoException {
+		List<TadoDevice> toReturn = new ArrayList<>();
+		try {
+			Map<String, String> headers = new HashMap<>();
+			headers.put("Authorization", "Bearer " + this.bearer);
+			String jsonResponse = doGetRequest("https://my.tado.com/api/v2/homes/" + idHome + "/devices", headers);
+			debugMessage("getDevices response: " + jsonResponse);
+			try {
+				// IF IT CAN PARSE THE JSONOBJECT IT WILL PROBABLY BE AN EXCEPTION
+				JSONObject json = new JSONObject(jsonResponse);
+				checkException(json);
+			} catch (JSONException e) {
+				// IF IT CANNOT PARSE THE JSONOBJECT IT WILL BE AN ARRAY OF DEVICES, WHICH IS
+				// THE EXPECTED RESULT
+				JSONArray jsonDevices = new JSONArray(jsonResponse);
+				for (Object o : jsonDevices) {
+					if (o instanceof JSONObject) {
+						JSONObject device = (JSONObject) o;
+						JSONObject jsonConnectionState = device.getJSONObject("connectionState");
+						Date timestamp = Date.from(Instant.parse(jsonConnectionState.optString("timestamp")));
+						TadoConnectionState connsectionState = new TadoConnectionState(
+								jsonConnectionState.getBoolean("value"), timestamp);
+						JSONArray jsonCapabilities = device.getJSONObject("characteristics")
+								.getJSONArray("capabilities");
+						List<String> capabilities = new ArrayList<>();
+						for (Object capability : jsonCapabilities) {
+							if (capability instanceof String)
+								capabilities.add((String) capability);
+						}
+						TadoDevice toAdd = new TadoDevice(device.optString("deviceType"), device.optString("serialNo"),
+								device.optString("shortSerialNo"), device.optString("currentFwVersion"),
+								connsectionState, capabilities, device.optBoolean("inPairingMode"),
+								device.optString("batteryState"), new ArrayList<String>());
+						toReturn.add(toAdd);
+					}
+				}
+
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (TadoException e) {
+			if (attempt > 1) {
+				throw e;
+			} else {
+				refresh();
+				toReturn = _getDevices(idHome, attempt + 1);
+			}
+		}
+		return toReturn;
+	}
+
+	public List<TadoInstallation> getInstallations(TadoHome tadoHome) throws TadoException {
+		return getInstallations(tadoHome.getId());
+	}
+
+	public List<TadoInstallation> getInstallations(int idHome) throws TadoException {
+		if (!this.initialized)
+			throw new TadoException("error", "You must initialize the TadoConnector");
+		return _getInstallations(idHome, 0);
+	}
+
+	public List<TadoInstallation> _getInstallations(int idHome, int attempt) throws TadoException {
+		List<TadoInstallation> toReturn = new ArrayList<>();
+		try {
+			Map<String, String> headers = new HashMap<>();
+			headers.put("Authorization", "Bearer " + this.bearer);
+			String jsonResponse = doGetRequest("https://my.tado.com/api/v2/homes/" + idHome + "/installations",
+					headers);
+			debugMessage("getInstallations response: " + jsonResponse);
+			try {
+				// IF IT CAN PARSE THE JSONOBJECT IT WILL PROBABLY BE AN EXCEPTION
+				JSONObject json = new JSONObject(jsonResponse);
+				checkException(json);
+			} catch (JSONException e) {
+				// IF IT CANNOT PARSE THE JSONOBJECT IT WILL BE AN ARRAY OF INSTALLATIONS, WHICH
+				// IS THE EXPECTED RESULT
+				JSONArray jsonInstallations = new JSONArray(jsonResponse);
+				for (Object o : jsonInstallations) {
+					if (o instanceof JSONObject) {
+						JSONObject installation = (JSONObject) o;
+						JSONArray jsonDevices = installation.getJSONArray("devices");
+						List<TadoDevice> devices = new ArrayList<>();
+						for (Object o2 : jsonDevices) {
+							if (o2 instanceof JSONObject) {
+								JSONObject device = (JSONObject) o2;
+								JSONObject jsonConnectionState = device.getJSONObject("connectionState");
+								Date timestamp = Date.from(Instant.parse(jsonConnectionState.optString("timestamp")));
+								TadoConnectionState connsectionState = new TadoConnectionState(
+										jsonConnectionState.getBoolean("value"), timestamp);
+								JSONArray jsonCapabilities = device.getJSONObject("characteristics")
+										.getJSONArray("capabilities");
+								List<String> capabilities = new ArrayList<>();
+								for (Object capability : jsonCapabilities) {
+									if (capability instanceof String)
+										capabilities.add((String) capability);
+								}
+								TadoDevice toAdd = new TadoDevice(device.optString("deviceType"),
+										device.optString("serialNo"), device.optString("shortSerialNo"),
+										device.optString("currentFwVersion"), connsectionState, capabilities,
+										device.optBoolean("inPairingMode"), device.optString("batteryState"),
+										new ArrayList<String>());
+								devices.add(toAdd);
+							}
+						}
+						TadoInstallation toAdd = new TadoInstallation(installation.getInt("id"),
+								installation.optString("type"), installation.getInt("revision"),
+								installation.getString("state"), devices);
+						toReturn.add(toAdd);
+					}
+				}
+
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (TadoException e) {
+			if (attempt > 1) {
+				throw e;
+			} else {
+				refresh();
+				toReturn = _getInstallations(idHome, attempt + 1);
 			}
 		}
 		return toReturn;

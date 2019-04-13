@@ -12,9 +12,9 @@ public class TadoHome {
 	private double awayRadiusInMeters;
 	private boolean usePreSkillsApps;
 	private boolean christmasModeEnabled;
-	private TadoContact contactDetails;
-	private TadoAddress address;
-	private TadoGeolocation geolocation;
+	private ContactDetails contactDetails;
+	private Address address;
+	private Geolocation geolocation;
 	private boolean consentGrantSkippable;
 
 	public int getId() {
@@ -57,15 +57,15 @@ public class TadoHome {
 		return christmasModeEnabled;
 	}
 
-	public TadoContact getContactDetails() {
+	public ContactDetails getContactDetails() {
 		return contactDetails;
 	}
 
-	public TadoAddress getAddress() {
+	public Address getAddress() {
 		return address;
 	}
 
-	public TadoGeolocation getGeolocation() {
+	public Geolocation getGeolocation() {
 		return geolocation;
 	}
 
@@ -86,8 +86,8 @@ public class TadoHome {
 
 	public TadoHome(int id, String name, String dateTimeZone, Date dateCreated, String temperatureUnit,
 			boolean installationCompleted, boolean simpleSmartScheduleEnabled, double awayRadiusInMeters,
-			boolean usePreSkillsApps, boolean christmasModeEnabled, TadoContact contactDetails, TadoAddress address,
-			TadoGeolocation geolocation, boolean consentGrantSkippable) {
+			boolean usePreSkillsApps, boolean christmasModeEnabled, ContactDetails contactDetails, Address address,
+			Geolocation geolocation, boolean consentGrantSkippable) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -111,6 +111,18 @@ public class TadoHome {
 
 	public TadoState getState(TadoConnector connector) throws TadoException {
 		return connector.getHomeState(this.id);
+	}
+
+	public TadoWeather getWeather(TadoConnector connector) throws TadoException {
+		return connector.getWeather(this.id);
+	}
+
+	public List<TadoDevice> getDevices(TadoConnector connector) throws TadoException {
+		return connector.getDevices(this.id);
+	}
+
+	public List<TadoInstallation> getInstallations(TadoConnector connector) throws TadoException {
+		return connector.getInstallations(this.id);
 	}
 
 	@Override

@@ -7,6 +7,7 @@ public class TadoDevice {
 	private String currentFwVersion;
 	private TadoConnectionState connectionState;
 	private List<String> capabilities;
+	private Boolean inPairingMode;
 	private String batteryState;
 	private List<String> duties;
 
@@ -34,6 +35,10 @@ public class TadoDevice {
 		return capabilities;
 	}
 
+	public Boolean getInPairingMode() {
+		return inPairingMode;
+	}
+
 	public String getBatteryState() {
 		return batteryState;
 	}
@@ -43,7 +48,8 @@ public class TadoDevice {
 	}
 
 	public TadoDevice(String deviceType, String serialNo, String shortSerialNo, String currentFwVersion,
-			TadoConnectionState connectionState, List<String> capabilities, String batteryState, List<String> duties) {
+			TadoConnectionState connectionState, List<String> capabilities, Boolean inPairingMode, String batteryState,
+			List<String> duties) {
 		super();
 		this.deviceType = deviceType;
 		this.serialNo = serialNo;
@@ -51,6 +57,7 @@ public class TadoDevice {
 		this.currentFwVersion = currentFwVersion;
 		this.connectionState = connectionState;
 		this.capabilities = capabilities;
+		this.inPairingMode = inPairingMode;
 		this.batteryState = batteryState;
 		this.duties = duties;
 	}
@@ -59,6 +66,7 @@ public class TadoDevice {
 	public String toString() {
 		return "TadoDevice [deviceType=" + deviceType + ", serialNo=" + serialNo + ", shortSerialNo=" + shortSerialNo
 				+ ", currentFwVersion=" + currentFwVersion + ", connectionState=" + connectionState + ", capabilities="
-				+ capabilities + ", batteryState=" + batteryState + ", duties=" + duties + "]";
+				+ capabilities + ", inPairingMode=" + inPairingMode + ", batteryState=" + batteryState + ", duties="
+				+ duties + "]";
 	}
 }

@@ -13,7 +13,7 @@ public class TadoZone {
 	private boolean supportsDazzle;
 	private boolean dazzleEnabled;
 	private TadoDazzleMode dazzleMode;
-	private TadoOpenWindowDetection openWindowDetection;
+	private OpenWindowDetection openWindowDetection;
 
 	public int getHomeId() {
 		return homeId;
@@ -59,13 +59,13 @@ public class TadoZone {
 		return dazzleMode;
 	}
 
-	public TadoOpenWindowDetection getOpenWindowDetection() {
+	public OpenWindowDetection getOpenWindowDetection() {
 		return openWindowDetection;
 	}
 
 	public TadoZone(int homeId, int id, String name, String type, Date dateCreated, List<String> deviceTypes,
 			List<TadoDevice> devices, boolean reportAvailable, boolean supportsDazzle, boolean dazzleEnabled,
-			TadoDazzleMode dazzleMode, TadoOpenWindowDetection openWindowDetection) {
+			TadoDazzleMode dazzleMode, OpenWindowDetection openWindowDetection) {
 		super();
 		this.homeId = homeId;
 		this.id = id;

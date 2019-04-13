@@ -1,7 +1,7 @@
 public class TadoSetting {
 	private String type;
 	private String power;
-	private TadoTemperature temperature;
+	private Temperature temperature;
 
 	public String getType() {
 		return type;
@@ -11,11 +11,11 @@ public class TadoSetting {
 		return power;
 	}
 
-	public TadoTemperature getTemperature() {
+	public Temperature getTemperature() {
 		return temperature;
 	}
 
-	public TadoSetting(String type, String power, TadoTemperature temperature) {
+	public TadoSetting(String type, String power, Temperature temperature) {
 		super();
 		this.type = type;
 		this.power = power;

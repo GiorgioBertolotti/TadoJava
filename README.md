@@ -8,7 +8,7 @@ It allows you to control your Tado and get its status.
    * [TadoJava](#tadojava)
    * [Table of contents](#table-of-contents)
    * [Getting started](#getting-started)
-     * [Installation](#installation)
+     * [Download](#download)
      * [Usage](#usage)
    * [Other](#other)
      * [Notes](#notes)
@@ -22,9 +22,9 @@ To use TadoJava you will need:
 - A Tado account ([You can create it here](https://my.tado.com/webapp/));
 - A client secret ([You can get yours here](https://my.tado.com/webapp/env.js)).
 
-### Installation
+### Download
 
-You can download the latest release of TadoJava [here](/releases/latest).  
+You can download the latest release of TadoJava [here](https://github.com/GiorgioBertolotti/TadoJava/releases).  
 After downloading the *.jar* file, you can include it in your Java project.
 
 ### Usage

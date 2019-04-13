@@ -1,4 +1,4 @@
-public class TadoContact {
+public class ContactDetails {
 	private String name;
 	private String email;
 	private String phone;
@@ -15,7 +15,7 @@ public class TadoContact {
 		return phone;
 	}
 
-	public TadoContact(String name, String email, String phone) {
+	public ContactDetails(String name, String email, String phone) {
 		super();
 		this.name = name;
 		this.email = email;

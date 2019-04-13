@@ -1,4 +1,4 @@
-public class TadoGeolocation {
+public class Geolocation {
 	private double latitude;
 	private double longitude;
 
@@ -10,7 +10,7 @@ public class TadoGeolocation {
 		return longitude;
 	}
 
-	public TadoGeolocation(double latitude, double longitude) {
+	public Geolocation(double latitude, double longitude) {
 		super();
 		this.latitude = latitude;
 		this.longitude = longitude;

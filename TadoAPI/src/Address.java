@@ -1,4 +1,4 @@
-public class TadoAddress {
+public class Address {
 	private String addressLine1;
 	private String addressLine2;
 	private String zipCode;
@@ -30,7 +30,7 @@ public class TadoAddress {
 		return country;
 	}
 
-	public TadoAddress(String addressLine1, String addressLine2, String zipCode, String city, String state,
+	public Address(String addressLine1, String addressLine2, String zipCode, String city, String state,
 			String country) {
 		super();
 		this.addressLine1 = addressLine1;

@@ -1,4 +1,4 @@
-public class TadoOpenWindowDetection {
+public class OpenWindowDetection {
 	private boolean supported;
 	private boolean enabled;
 	private int timeoutInSeconds;
@@ -15,7 +15,7 @@ public class TadoOpenWindowDetection {
 		return timeoutInSeconds;
 	}
 
-	public TadoOpenWindowDetection(boolean supported, boolean enabled, int timeoutInSeconds) {
+	public OpenWindowDetection(boolean supported, boolean enabled, int timeoutInSeconds) {
 		super();
 		this.supported = supported;
 		this.enabled = enabled;

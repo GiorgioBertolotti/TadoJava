@@ -1,4 +1,4 @@
-public class TadoTemperature {
+public class Temperature {
 	private double celsius;
 	private double fahrenheit;
 
@@ -10,7 +10,7 @@ public class TadoTemperature {
 		return fahrenheit;
 	}
 
-	public TadoTemperature(double celsius, double fahrenheit) {
+	public Temperature(double celsius, double fahrenheit) {
 		super();
 		this.celsius = celsius;
 		this.fahrenheit = fahrenheit;
