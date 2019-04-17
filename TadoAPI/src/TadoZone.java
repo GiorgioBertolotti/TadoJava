@@ -81,8 +81,20 @@ public class TadoZone {
 		this.openWindowDetection = openWindowDetection;
 	}
 
-	public TadoZoneState getZoneState(TadoConnector connector) throws TadoException {
+	public TadoZoneState getState(TadoConnector connector) throws TadoException {
 		return connector.getZoneState(this.homeId, this.id);
+	}
+
+	public Capability getCapabilities(TadoConnector connector) throws TadoException {
+		return connector.getZoneCapabilities(this.homeId, this.id);
+	}
+
+	public boolean getEarlyStart(TadoConnector connector) throws TadoException {
+		return connector.getZoneEarlyStart(this.homeId, this.id);
+	}
+
+	public boolean setEarlyStart(boolean enabled, TadoConnector connector) throws TadoException {
+		return connector.setZoneEarlyStart(this.homeId, this.id, enabled);
 	}
 
 	@Override

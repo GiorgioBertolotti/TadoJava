@@ -33,8 +33,8 @@ The *Example* folder contains an eclipse project with an example on how to use t
 In order to start using TadoJava you can declare a *TadoConnector* object as follows:
 
 ```java
-TadoConnector connector = new TadoConnector("***REMOVED***", "Password123!");
-//TadoConnector connector = new TadoConnector("***REMOVED***", "Password123!", "clientSecret");
+TadoConnector connector = new TadoConnector("your@email.com", "Password123!");
+//TadoConnector connector = new TadoConnector("your@email.com", "Password123!", "clientSecret");
 ```
 
 The TadoConnector object will take care of performing HTTP request to Tado's API, it will also manage the bearer token in all the requests.  

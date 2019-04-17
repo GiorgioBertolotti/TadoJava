@@ -1,5 +1,6 @@
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public class TadoHome {
 	private int id;
@@ -123,6 +124,26 @@ public class TadoHome {
 
 	public List<TadoInstallation> getInstallations(TadoConnector connector) throws TadoException {
 		return connector.getInstallations(this.id);
+	}
+
+	public List<User> getUsers(TadoConnector connector) throws TadoException {
+		return connector.getUsers(this.id);
+	}
+
+	public List<MobileDevice> getMobileDevices(TadoConnector connector) throws TadoException {
+		return connector.getMobileDevices(this.id);
+	}
+
+	public MobileDevice getMobileDevice(int id, TadoConnector connector) throws TadoException {
+		return connector.getMobileDevice(id, this.id);
+	}
+
+	public Map<String, Object> getMobileDeviceSettings(int deviceId, TadoConnector connector) throws TadoException {
+		return connector.getMobileDeviceSettings(deviceId, this.id);
+	}
+
+	public boolean setGeoTracking(int deviceId, boolean enabled, TadoConnector connector) throws TadoException {
+		return connector.setGeoTracking(this.id, deviceId, enabled);
 	}
 
 	@Override

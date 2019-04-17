@@ -17,6 +17,7 @@ import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class TadoConnector {
@@ -144,7 +145,7 @@ public class TadoConnector {
 		return _getHomesIDs(0);
 	}
 
-	public List<Integer> _getHomesIDs(int attempt) throws TadoException {
+	private List<Integer> _getHomesIDs(int attempt) throws TadoException {
 		List<Integer> toReturn = new ArrayList<>();
 		try {
 			Map<String, String> headers = new HashMap<>();
@@ -255,18 +256,18 @@ public class TadoConnector {
 		return getZones(tadoHome.getId());
 	}
 
-	public List<TadoZone> getZones(int idHome) throws TadoException {
+	public List<TadoZone> getZones(int homeId) throws TadoException {
 		if (!this.initialized)
 			throw new TadoException("error", "You must initialize the TadoConnector");
-		return _getZones(idHome, 0);
+		return _getZones(homeId, 0);
 	}
 
-	private List<TadoZone> _getZones(int idHome, int attempt) throws TadoException {
+	private List<TadoZone> _getZones(int homeId, int attempt) throws TadoException {
 		List<TadoZone> toReturn = new ArrayList<>();
 		try {
 			Map<String, String> headers = new HashMap<>();
 			headers.put("Authorization", "Bearer " + this.bearer);
-			String jsonResponse = doGetRequest("https://my.tado.com/api/v2/homes/" + idHome + "/zones", headers);
+			String jsonResponse = doGetRequest("https://my.tado.com/api/v2/homes/" + homeId + "/zones", headers);
 			debugMessage("getZones response: " + jsonResponse);
 			try {
 				// IF IT CAN PARSE THE JSONOBJECT IT WILL PROBABLY BE AN EXCEPTION
@@ -293,7 +294,7 @@ public class TadoConnector {
 								JSONObject device = (JSONObject) jsonDevice;
 								JSONObject jsonConnectionState = device.getJSONObject("connectionState");
 								Date timestamp = Date.from(Instant.parse(jsonConnectionState.optString("timestamp")));
-								TadoConnectionState connsectionState = new TadoConnectionState(
+								TadoConnectionState connectionState = new TadoConnectionState(
 										jsonConnectionState.getBoolean("value"), timestamp);
 								JSONArray jsonCapabilities = device.getJSONObject("characteristics")
 										.getJSONArray("capabilities");
@@ -310,7 +311,7 @@ public class TadoConnector {
 								}
 								TadoDevice toAdd = new TadoDevice(device.optString("deviceType"),
 										device.optString("serialNo"), device.optString("shortSerialNo"),
-										device.optString("currentFwVersion"), connsectionState, capabilities,
+										device.optString("currentFwVersion"), connectionState, capabilities,
 										device.optBoolean("inPairingMode"), device.optString("batteryState"), duties);
 								devices.add(toAdd);
 							}
@@ -323,7 +324,7 @@ public class TadoConnector {
 								jsonOpenWindowDetection.getBoolean("supported"),
 								jsonOpenWindowDetection.getBoolean("enabled"),
 								jsonOpenWindowDetection.getInt("timeoutInSeconds"));
-						TadoZone zone = new TadoZone(idHome, jsonZone.getInt("id"), jsonZone.optString("name"),
+						TadoZone zone = new TadoZone(homeId, jsonZone.getInt("id"), jsonZone.optString("name"),
 								jsonZone.optString("type"), dateCreated, deviceTypes, devices,
 								jsonZone.getBoolean("reportAvailable"), jsonZone.getBoolean("supportsDazzle"),
 								jsonZone.getBoolean("dazzleEnabled"), dazzleMode, openWindowDetection);
@@ -338,7 +339,7 @@ public class TadoConnector {
 				throw e;
 			} else {
 				refresh();
-				toReturn = _getZones(idHome, attempt + 1);
+				toReturn = _getZones(homeId, attempt + 1);
 			}
 		}
 		return toReturn;
@@ -348,18 +349,18 @@ public class TadoConnector {
 		return getHomeState(tadoHome.getId());
 	}
 
-	public TadoState getHomeState(int idHome) throws TadoException {
+	public TadoState getHomeState(int homeId) throws TadoException {
 		if (!this.initialized)
 			throw new TadoException("error", "You must initialize the TadoConnector");
-		return _getHomeState(idHome, 0);
+		return _getHomeState(homeId, 0);
 	}
 
-	private TadoState _getHomeState(int idHome, int attempt) throws TadoException {
+	private TadoState _getHomeState(int homeId, int attempt) throws TadoException {
 		TadoState toReturn = null;
 		try {
 			Map<String, String> headers = new HashMap<>();
 			headers.put("Authorization", "Bearer " + this.bearer);
-			String jsonResponse = doGetRequest("https://my.tado.com/api/v2/homes/" + idHome + "/state", headers);
+			String jsonResponse = doGetRequest("https://my.tado.com/api/v2/homes/" + homeId + "/state", headers);
 			debugMessage("getHomeState response: " + jsonResponse);
 			JSONObject json = new JSONObject(jsonResponse);
 			checkException(json);
@@ -371,7 +372,7 @@ public class TadoConnector {
 				throw e;
 			} else {
 				refresh();
-				toReturn = _getHomeState(idHome, attempt + 1);
+				toReturn = _getHomeState(homeId, attempt + 1);
 			}
 		}
 		return toReturn;
@@ -381,19 +382,19 @@ public class TadoConnector {
 		return getZoneState(tadoZone.getHomeId(), tadoZone.getId());
 	}
 
-	public TadoZoneState getZoneState(int idHome, int idZone) throws TadoException {
+	public TadoZoneState getZoneState(int homeId, int idZone) throws TadoException {
 		if (!this.initialized)
 			throw new TadoException("error", "You must initialize the TadoConnector");
-		return _getZoneState(idHome, idZone, 0);
+		return _getZoneState(homeId, idZone, 0);
 	}
 
-	private TadoZoneState _getZoneState(int idHome, int idZone, int attempt) throws TadoException {
+	private TadoZoneState _getZoneState(int homeId, int idZone, int attempt) throws TadoException {
 		TadoZoneState toReturn = null;
 		try {
 			Map<String, String> headers = new HashMap<>();
 			headers.put("Authorization", "Bearer " + this.bearer);
 			String jsonResponse = doGetRequest(
-					"https://my.tado.com/api/v2/homes/" + idHome + "/zones/" + idZone + "/state", headers);
+					"https://my.tado.com/api/v2/homes/" + homeId + "/zones/" + idZone + "/state", headers);
 			debugMessage("getZoneState response: " + jsonResponse);
 			JSONObject json = new JSONObject(jsonResponse);
 			checkException(json);
@@ -457,7 +458,7 @@ public class TadoConnector {
 				throw e;
 			} else {
 				refresh();
-				toReturn = _getZoneState(idHome, idZone, attempt + 1);
+				toReturn = _getZoneState(homeId, idZone, attempt + 1);
 			}
 		}
 		return toReturn;
@@ -467,18 +468,18 @@ public class TadoConnector {
 		return getWeather(tadoHome.getId());
 	}
 
-	public TadoWeather getWeather(int idHome) throws TadoException {
+	public TadoWeather getWeather(int homeId) throws TadoException {
 		if (!this.initialized)
 			throw new TadoException("error", "You must initialize the TadoConnector");
-		return _getWeather(idHome, 0);
+		return _getWeather(homeId, 0);
 	}
 
-	private TadoWeather _getWeather(int idHome, int attempt) throws TadoException {
+	private TadoWeather _getWeather(int homeId, int attempt) throws TadoException {
 		TadoWeather toReturn = null;
 		try {
 			Map<String, String> headers = new HashMap<>();
 			headers.put("Authorization", "Bearer " + this.bearer);
-			String jsonResponse = doGetRequest("https://my.tado.com/api/v2/homes/" + idHome + "/weather", headers);
+			String jsonResponse = doGetRequest("https://my.tado.com/api/v2/homes/" + homeId + "/weather", headers);
 			debugMessage("getWeather response: " + jsonResponse);
 			JSONObject json = new JSONObject(jsonResponse);
 			checkException(json);
@@ -505,7 +506,7 @@ public class TadoConnector {
 				throw e;
 			} else {
 				refresh();
-				toReturn = _getWeather(idHome, attempt + 1);
+				toReturn = _getWeather(homeId, attempt + 1);
 			}
 		}
 		return toReturn;
@@ -515,18 +516,18 @@ public class TadoConnector {
 		return getDevices(tadoHome.getId());
 	}
 
-	public List<TadoDevice> getDevices(int idHome) throws TadoException {
+	public List<TadoDevice> getDevices(int homeId) throws TadoException {
 		if (!this.initialized)
 			throw new TadoException("error", "You must initialize the TadoConnector");
-		return _getDevices(idHome, 0);
+		return _getDevices(homeId, 0);
 	}
 
-	public List<TadoDevice> _getDevices(int idHome, int attempt) throws TadoException {
+	private List<TadoDevice> _getDevices(int homeId, int attempt) throws TadoException {
 		List<TadoDevice> toReturn = new ArrayList<>();
 		try {
 			Map<String, String> headers = new HashMap<>();
 			headers.put("Authorization", "Bearer " + this.bearer);
-			String jsonResponse = doGetRequest("https://my.tado.com/api/v2/homes/" + idHome + "/devices", headers);
+			String jsonResponse = doGetRequest("https://my.tado.com/api/v2/homes/" + homeId + "/devices", headers);
 			debugMessage("getDevices response: " + jsonResponse);
 			try {
 				// IF IT CAN PARSE THE JSONOBJECT IT WILL PROBABLY BE AN EXCEPTION
@@ -566,7 +567,7 @@ public class TadoConnector {
 				throw e;
 			} else {
 				refresh();
-				toReturn = _getDevices(idHome, attempt + 1);
+				toReturn = _getDevices(homeId, attempt + 1);
 			}
 		}
 		return toReturn;
@@ -576,18 +577,18 @@ public class TadoConnector {
 		return getInstallations(tadoHome.getId());
 	}
 
-	public List<TadoInstallation> getInstallations(int idHome) throws TadoException {
+	public List<TadoInstallation> getInstallations(int homeId) throws TadoException {
 		if (!this.initialized)
 			throw new TadoException("error", "You must initialize the TadoConnector");
-		return _getInstallations(idHome, 0);
+		return _getInstallations(homeId, 0);
 	}
 
-	public List<TadoInstallation> _getInstallations(int idHome, int attempt) throws TadoException {
+	private List<TadoInstallation> _getInstallations(int homeId, int attempt) throws TadoException {
 		List<TadoInstallation> toReturn = new ArrayList<>();
 		try {
 			Map<String, String> headers = new HashMap<>();
 			headers.put("Authorization", "Bearer " + this.bearer);
-			String jsonResponse = doGetRequest("https://my.tado.com/api/v2/homes/" + idHome + "/installations",
+			String jsonResponse = doGetRequest("https://my.tado.com/api/v2/homes/" + homeId + "/installations",
 					headers);
 			debugMessage("getInstallations response: " + jsonResponse);
 			try {
@@ -640,10 +641,376 @@ public class TadoConnector {
 				throw e;
 			} else {
 				refresh();
-				toReturn = _getInstallations(idHome, attempt + 1);
+				toReturn = _getInstallations(homeId, attempt + 1);
 			}
 		}
 		return toReturn;
+	}
+
+	public List<User> getUsers(TadoHome tadoHome) throws TadoException {
+		return getUsers(tadoHome.getId());
+	}
+
+	public List<User> getUsers(int homeId) throws TadoException {
+		if (!this.initialized)
+			throw new TadoException("error", "You must initialize the TadoConnector");
+		return _getUsers(homeId, 0);
+	}
+
+	private List<User> _getUsers(int homeId, int attempt) throws TadoException {
+		List<User> toReturn = new ArrayList<>();
+		try {
+			Map<String, String> headers = new HashMap<>();
+			headers.put("Authorization", "Bearer " + this.bearer);
+			String jsonResponse = doGetRequest("https://my.tado.com/api/v2/homes/" + homeId + "/users", headers);
+			debugMessage("getUsers response: " + jsonResponse);
+			try {
+				// IF IT CAN PARSE THE JSONOBJECT IT WILL PROBABLY BE AN EXCEPTION
+				JSONObject json = new JSONObject(jsonResponse);
+				checkException(json);
+			} catch (JSONException e) {
+				// IF IT CANNOT PARSE THE JSONOBJECT IT WILL BE AN ARRAY OF INSTALLATIONS, WHICH
+				// IS THE EXPECTED RESULT
+				JSONArray jsonUsers = new JSONArray(jsonResponse);
+				for (Object o : jsonUsers) {
+					if (o instanceof JSONObject) {
+						JSONObject user = (JSONObject) o;
+						JSONArray jsonHomes = user.getJSONArray("homes");
+						Map<Integer, String> homes = new HashMap<>();
+						for (Object o2 : jsonHomes) {
+							if (o2 instanceof JSONObject) {
+								JSONObject home = (JSONObject) o2;
+								homes.put(home.getInt("id"), home.optString("name"));
+							}
+						}
+						JSONArray jsonDevices = user.getJSONArray("mobileDevices");
+						List<MobileDevice> mobileDevices = new ArrayList<>();
+						for (Object o2 : jsonDevices) {
+							if (o2 instanceof JSONObject) {
+								JSONObject device = (JSONObject) o2;
+								mobileDevices.add(parseMobileDevice(homeId, device));
+							}
+						}
+						User toAdd = new User(user.optString("name"), user.optString("email"),
+								user.optString("username"), homes, user.optString("locale"), mobileDevices);
+						toReturn.add(toAdd);
+					}
+				}
+
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (TadoException e) {
+			if (attempt > 1) {
+				throw e;
+			} else {
+				refresh();
+				toReturn = _getUsers(homeId, attempt + 1);
+			}
+		}
+		return toReturn;
+	}
+
+	public List<MobileDevice> getMobileDevices(TadoHome tadoHome) throws TadoException {
+		return getMobileDevices(tadoHome.getId());
+	}
+
+	public List<MobileDevice> getMobileDevices(int homeId) throws TadoException {
+		if (!this.initialized)
+			throw new TadoException("error", "You must initialize the TadoConnector");
+		return _getMobileDevices(homeId, 0);
+	}
+
+	private List<MobileDevice> _getMobileDevices(int homeId, int attempt) throws TadoException {
+		List<MobileDevice> toReturn = new ArrayList<>();
+		try {
+			Map<String, String> headers = new HashMap<>();
+			headers.put("Authorization", "Bearer " + this.bearer);
+			String jsonResponse = doGetRequest("https://my.tado.com/api/v2/homes/" + homeId + "/mobileDevices",
+					headers);
+			debugMessage("getMobileDevices response: " + jsonResponse);
+			try {
+				// IF IT CAN PARSE THE JSONOBJECT IT WILL PROBABLY BE AN EXCEPTION
+				JSONObject json = new JSONObject(jsonResponse);
+				checkException(json);
+			} catch (JSONException e) {
+				// IF IT CANNOT PARSE THE JSONOBJECT IT WILL BE AN ARRAY OF INSTALLATIONS, WHICH
+				// IS THE EXPECTED RESULT
+				JSONArray jsonDevices = new JSONArray(jsonResponse);
+				for (Object o : jsonDevices) {
+					if (o instanceof JSONObject) {
+						JSONObject device = (JSONObject) o;
+						toReturn.add(parseMobileDevice(homeId, device));
+					}
+				}
+
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (TadoException e) {
+			if (attempt > 1) {
+				throw e;
+			} else {
+				refresh();
+				toReturn = _getMobileDevices(homeId, attempt + 1);
+			}
+		}
+		return toReturn;
+	}
+
+	public MobileDevice getMobileDevice(int deviceId, TadoHome tadoHome) throws TadoException {
+		return getMobileDevice(deviceId, tadoHome.getId());
+	}
+
+	public MobileDevice getMobileDevice(int deviceId, int homeId) throws TadoException {
+		if (!this.initialized)
+			throw new TadoException("error", "You must initialize the TadoConnector");
+		return _getMobileDevice(deviceId, homeId, 0);
+	}
+
+	private MobileDevice _getMobileDevice(int deviceId, int homeId, int attempt) throws TadoException {
+		MobileDevice toReturn = null;
+		try {
+			Map<String, String> headers = new HashMap<>();
+			headers.put("Authorization", "Bearer " + this.bearer);
+			String jsonResponse = doGetRequest(
+					"https://my.tado.com/api/v2/homes/" + homeId + "/mobileDevices/" + deviceId, headers);
+			debugMessage("getMobileDevice response: " + jsonResponse);
+			JSONObject json = new JSONObject(jsonResponse);
+			checkException(json);
+			toReturn = parseMobileDevice(homeId, json);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (TadoException e) {
+			if (attempt > 1) {
+				throw e;
+			} else {
+				refresh();
+				toReturn = _getMobileDevice(deviceId, homeId, attempt + 1);
+			}
+		}
+		return toReturn;
+	}
+
+	public Map<String, Object> getMobileDeviceSettings(MobileDevice device) throws TadoException {
+		return getMobileDeviceSettings(device.getHomeId(), device.getId());
+	}
+
+	public Map<String, Object> getMobileDeviceSettings(int homeId, int deviceId) throws TadoException {
+		if (!this.initialized)
+			throw new TadoException("error", "You must initialize the TadoConnector");
+		return _getMobileDeviceSettings(homeId, deviceId, 0);
+	}
+
+	private Map<String, Object> _getMobileDeviceSettings(int homeId, int deviceId, int attempt) throws TadoException {
+		Map<String, Object> toReturn = null;
+		try {
+			Map<String, String> headers = new HashMap<>();
+			headers.put("Authorization", "Bearer " + this.bearer);
+			String jsonResponse = doGetRequest(
+					"https://my.tado.com/api/v2/homes/" + homeId + "/mobileDevices/" + deviceId + "/settings", headers);
+			debugMessage("getMobileDeviceSettings response: " + jsonResponse);
+			JSONObject json = new JSONObject(jsonResponse);
+			checkException(json);
+			toReturn = new HashMap<>();
+			for (String key : json.keySet()) {
+				toReturn.put(key, json.get(key));
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (TadoException e) {
+			if (attempt > 1) {
+				throw e;
+			} else {
+				refresh();
+				toReturn = _getMobileDeviceSettings(homeId, deviceId, attempt + 1);
+			}
+		}
+		return toReturn;
+	}
+
+	public Capability getZoneCapabilities(TadoZone tadoZone) throws TadoException {
+		return getZoneCapabilities(tadoZone.getHomeId(), tadoZone.getId());
+	}
+
+	public Capability getZoneCapabilities(int homeId, int zoneId) throws TadoException {
+		if (!this.initialized)
+			throw new TadoException("error", "You must initialize the TadoConnector");
+		return _getZoneCapabilities(homeId, zoneId, 0);
+	}
+
+	private Capability _getZoneCapabilities(int homeId, int zoneId, int attempt) throws TadoException {
+		Capability toReturn = null;
+		try {
+			Map<String, String> headers = new HashMap<>();
+			headers.put("Authorization", "Bearer " + this.bearer);
+			String jsonResponse = doGetRequest(
+					"https://my.tado.com/api/v2/homes/" + homeId + "/zones/" + zoneId + "/capabilities", headers);
+			debugMessage("getZoneCapabilities response: " + jsonResponse);
+			JSONObject json = new JSONObject(jsonResponse);
+			checkException(json);
+			String type = null;
+			String key = null;
+			Object value = null;
+			for (String key1 : json.keySet()) {
+				if (key1.equals("type"))
+					type = json.getString(key1);
+				else {
+					key = key1;
+					value = json.get(key1);
+				}
+			}
+			if (type == null && key == null && value == null)
+				toReturn = null;
+			else
+				toReturn = new Capability(type, key, value);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (TadoException e) {
+			if (attempt > 1) {
+				throw e;
+			} else {
+				refresh();
+				toReturn = _getZoneCapabilities(homeId, zoneId, attempt + 1);
+			}
+		}
+		return toReturn;
+	}
+
+	public boolean getZoneEarlyStart(TadoZone tadoZone) throws TadoException {
+		return getZoneEarlyStart(tadoZone.getHomeId(), tadoZone.getId());
+	}
+
+	public boolean getZoneEarlyStart(int homeId, int zoneId) throws TadoException {
+		if (!this.initialized)
+			throw new TadoException("error", "You must initialize the TadoConnector");
+		return _getZoneEarlyStart(homeId, zoneId, 0);
+	}
+
+	private boolean _getZoneEarlyStart(int homeId, int zoneId, int attempt) throws TadoException {
+		boolean toReturn = false;
+		try {
+			Map<String, String> headers = new HashMap<>();
+			headers.put("Authorization", "Bearer " + this.bearer);
+			String jsonResponse = doGetRequest(
+					"https://my.tado.com/api/v2/homes/" + homeId + "/zones/" + zoneId + "/earlyStart", headers);
+			debugMessage("getZoneEarlyStart response: " + jsonResponse);
+			JSONObject json = new JSONObject(jsonResponse);
+			checkException(json);
+			toReturn = json.getBoolean("enabled");
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (TadoException e) {
+			if (attempt > 1) {
+				throw e;
+			} else {
+				refresh();
+				toReturn = _getZoneEarlyStart(homeId, zoneId, attempt + 1);
+			}
+		}
+		return toReturn;
+	}
+
+	public boolean setGeoTracking(MobileDevice device, boolean enabled) throws TadoException {
+		return setGeoTracking(device.getHomeId(), device.getId(), enabled);
+	}
+
+	public boolean setGeoTracking(int homeId, int deviceId, boolean enabled) throws TadoException {
+		if (!this.initialized)
+			throw new TadoException("error", "You must initialize the TadoConnector");
+		return _setGeoTracking(homeId, deviceId, enabled, 0);
+	}
+
+	private boolean _setGeoTracking(int homeId, int deviceId, boolean enabled, int attempt) throws TadoException {
+		boolean toReturn = false;
+		try {
+			Map<String, String> headers = new HashMap<>();
+			headers.put("Authorization", "Bearer " + this.bearer);
+			headers.put("Content-type", "application/json;charset=UTF-8");
+			JSONObject toPut = new JSONObject();
+			toPut.put("geoTrackingEnabled", enabled);
+			String jsonResponse = doPutRequest(
+					"https://my.tado.com/api/v2/homes/" + homeId + "/mobileDevices/" + deviceId + "/settings",
+					toPut.toString(), headers);
+			debugMessage("setGeoTracking response: " + jsonResponse);
+			JSONObject json = new JSONObject(jsonResponse);
+			checkException(json);
+			toReturn = true;
+		} catch (IOException e) {
+			e.printStackTrace();
+			toReturn = false;
+		} catch (TadoException e) {
+			if (attempt > 1) {
+				throw e;
+			} else {
+				refresh();
+				toReturn = _setGeoTracking(homeId, deviceId, enabled, attempt + 1);
+			}
+		}
+		return toReturn;
+	}
+
+	public boolean setZoneEarlyStart(TadoZone zone, boolean enabled) throws TadoException {
+		return setZoneEarlyStart(zone.getHomeId(), zone.getId(), enabled);
+	}
+
+	public boolean setZoneEarlyStart(int homeId, int zoneId, boolean enabled) throws TadoException {
+		if (!this.initialized)
+			throw new TadoException("error", "You must initialize the TadoConnector");
+		return _setZoneEarlyStart(homeId, zoneId, enabled, 0);
+	}
+
+	private boolean _setZoneEarlyStart(int homeId, int zoneId, boolean enabled, int attempt) throws TadoException {
+		boolean toReturn = false;
+		try {
+			Map<String, String> headers = new HashMap<>();
+			headers.put("Authorization", "Bearer " + this.bearer);
+			headers.put("Content-type", "application/json;charset=UTF-8");
+			JSONObject toPut = new JSONObject();
+			toPut.put("enabled", enabled);
+			String jsonResponse = doPutRequest(
+					"https://my.tado.com/api/v2/homes/" + homeId + "/zones/" + zoneId + "/earlyStart", toPut.toString(),
+					headers);
+			debugMessage("setZoneEarlyStart response: " + jsonResponse);
+			JSONObject json = new JSONObject(jsonResponse);
+			checkException(json);
+			toReturn = true;
+		} catch (IOException e) {
+			e.printStackTrace();
+			toReturn = false;
+		} catch (TadoException e) {
+			if (attempt > 1) {
+				throw e;
+			} else {
+				refresh();
+				toReturn = _setZoneEarlyStart(homeId, zoneId, enabled, attempt + 1);
+			}
+		}
+		return toReturn;
+	}
+
+	private MobileDevice parseMobileDevice(int homeId, JSONObject device) {
+		JSONObject jsonSettings = device.getJSONObject("settings");
+		Map<String, Object> settings = new HashMap<>();
+		for (String key : jsonSettings.keySet()) {
+			settings.put(key, jsonSettings.get(key));
+		}
+		MobileLocation location = null;
+		if (!device.isNull("location")) {
+			JSONObject jsonLocation = device.getJSONObject("location");
+			location = new MobileLocation(jsonLocation.getBoolean("stale"), jsonLocation.getBoolean("atHome"),
+					jsonLocation.getJSONObject("bearingFromHome").getDouble("degrees"),
+					jsonLocation.getJSONObject("bearingFromHome").getDouble("radians"),
+					jsonLocation.getDouble("relativeDistanceFromHomeFence"));
+		}
+		DeviceMetadata deviceMetadata = null;
+		if (!device.isNull("deviceMetadata")) {
+			JSONObject jsonMetadata = device.getJSONObject("deviceMetadata");
+			deviceMetadata = new DeviceMetadata(jsonMetadata.getString("platform"), jsonMetadata.getString("osVersion"),
+					jsonMetadata.getString("model"), jsonMetadata.getString("locale"));
+		}
+		return new MobileDevice(homeId, device.optString("name"), device.getInt("id"), settings, location,
+				deviceMetadata);
 	}
 
 	private void checkException(JSONObject json) throws TadoException {
@@ -681,6 +1048,18 @@ public class TadoConnector {
 			request = new Request.Builder().url(url).post(formBody).headers(Headers.of(headers)).build();
 		else
 			request = new Request.Builder().url(url).post(formBody).build();
+		Response response = client.newCall(request).execute();
+		return response.body().string();
+	}
+
+	private String doPutRequest(String url, String jsonBody, Map<String, String> headers) throws IOException {
+		MediaType mediaType = MediaType.parse("application/json;charset=UTF-8");
+		RequestBody body = RequestBody.create(mediaType, jsonBody);
+		Request request;
+		if (headers != null)
+			request = new Request.Builder().url(url).put(body).headers(Headers.of(headers)).build();
+		else
+			request = new Request.Builder().url(url).put(body).build();
 		Response response = client.newCall(request).execute();
 		return response.body().string();
 	}

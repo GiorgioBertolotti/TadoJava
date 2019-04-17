@@ -4,7 +4,7 @@
   <groupId>TadoAPI</groupId>
   <artifactId>TadoAPI</artifactId>
   <name>TadoAPI</name>
-  <version>0.4.2</version>
+  <version>0.4.3</version>
   <description>Java wrapper for Tado APIs</description>
   <build>
     <sourceDirectory>src</sourceDirectory>
