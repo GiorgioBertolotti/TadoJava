@@ -22,6 +22,20 @@ public class HomeID {
 					 * System.out.println(zone.getEarlyStart(connector)); zone.setEarlyStart(true,
 					 * connector); System.out.println(zone.getEarlyStart(connector));
 					 */
+					System.out.println("ZONE OVERLAY");
+					try {
+						System.out.println(zone.getOverlay(connector));
+					} catch (TadoException e) {
+						if (e.getCode().equals("notFound")) {
+							System.out.println("This zone has no overlay.");
+						} else
+							throw e;
+					}
+					/*
+					 * TadoOverlay overlay = new TadoOverlay(new TadoSetting(true, 25.0, null), new
+					 * TadoModeTermination()); System.out.println(zone.setOverlay(overlay,
+					 * connector)); zone.deleteOverlay(connector);
+					 */
 				}
 				System.out.println("DEVICES:");
 				for (TadoDevice device : home.getDevices(connector)) {

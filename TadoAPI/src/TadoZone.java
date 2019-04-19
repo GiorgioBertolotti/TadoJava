@@ -97,6 +97,18 @@ public class TadoZone {
 		return connector.setZoneEarlyStart(this.homeId, this.id, enabled);
 	}
 
+	public TadoOverlay getOverlay(TadoConnector connector) throws TadoException {
+		return connector.getZoneOverlay(this.homeId, this.id);
+	}
+
+	public TadoOverlay setOverlay(TadoOverlay overlay, TadoConnector connector) throws TadoException {
+		return connector.setZoneOverlay(this.homeId, this.id, overlay);
+	}
+
+	public void deleteOverlay(TadoConnector connector) throws TadoException {
+		connector.deleteZoneOverlay(this.homeId, this.id);
+	}
+
 	@Override
 	public String toString() {
 		return "TadoZone [homeId=" + homeId + ", id=" + id + ", name=" + name + ", type=" + type + ", dateCreated="

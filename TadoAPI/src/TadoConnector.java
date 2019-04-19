@@ -408,8 +408,8 @@ public class TadoConnector {
 			JSONObject jsonTemperature = jsonSetting.getJSONObject("temperature");
 			Temperature temperature = new Temperature(jsonTemperature.optDouble("celsius"),
 					jsonTemperature.optDouble("fahrenheit"));
-			TadoSetting setting = new TadoSetting(jsonSetting.optString("type"), jsonSetting.optString("power"),
-					temperature);
+			TadoSetting setting = new TadoSetting(jsonSetting.optString("type"),
+					jsonSetting.optString("power").equals("ON"), temperature);
 			JSONObject jsonScheduleChange = json.optJSONObject("nextScheduleChange");
 			TadoScheduleChange nextScheduleChange = null;
 			if (jsonScheduleChange != null) {
@@ -418,8 +418,8 @@ public class TadoConnector {
 				JSONObject jsonTemperature2 = jsonSetting2.getJSONObject("temperature");
 				Temperature temperature2 = new Temperature(jsonTemperature2.optDouble("celsius"),
 						jsonTemperature2.optDouble("fahrenheit"));
-				TadoSetting setting2 = new TadoSetting(jsonSetting2.optString("type"), jsonSetting2.optString("power"),
-						temperature2);
+				TadoSetting setting2 = new TadoSetting(jsonSetting2.optString("type"),
+						jsonSetting2.optString("power").equals("ON"), temperature2);
 				nextScheduleChange = new TadoScheduleChange(start, setting2);
 			}
 			JSONObject jsonActivityDataPoints = json.optJSONObject("activityDataPoints");
@@ -911,6 +911,40 @@ public class TadoConnector {
 		return toReturn;
 	}
 
+	public TadoOverlay getZoneOverlay(TadoZone tadoZone) throws TadoException {
+		return getZoneOverlay(tadoZone.getHomeId(), tadoZone.getId());
+	}
+
+	public TadoOverlay getZoneOverlay(int homeId, int zoneId) throws TadoException {
+		if (!this.initialized)
+			throw new TadoException("error", "You must initialize the TadoConnector");
+		return _getZoneOverlay(homeId, zoneId, 0);
+	}
+
+	private TadoOverlay _getZoneOverlay(int homeId, int zoneId, int attempt) throws TadoException {
+		TadoOverlay toReturn = null;
+		try {
+			Map<String, String> headers = new HashMap<>();
+			headers.put("Authorization", "Bearer " + this.bearer);
+			String jsonResponse = doGetRequest(
+					"https://my.tado.com/api/v2/homes/" + homeId + "/zones/" + zoneId + "/overlay", headers);
+			debugMessage("getZoneOverlay response: " + jsonResponse);
+			JSONObject json = new JSONObject(jsonResponse);
+			checkException(json);
+			toReturn = parseTadoOverlay(json);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (TadoException e) {
+			if (attempt > 1) {
+				throw e;
+			} else {
+				refresh();
+				toReturn = _getZoneOverlay(homeId, zoneId, attempt + 1);
+			}
+		}
+		return toReturn;
+	}
+
 	public boolean setGeoTracking(MobileDevice device, boolean enabled) throws TadoException {
 		return setGeoTracking(device.getHomeId(), device.getId(), enabled);
 	}
@@ -989,6 +1023,81 @@ public class TadoConnector {
 		return toReturn;
 	}
 
+	public TadoOverlay setZoneOverlay(TadoZone zone, TadoOverlay overlay) throws TadoException {
+		return setZoneOverlay(zone.getHomeId(), zone.getId(), overlay);
+	}
+
+	public TadoOverlay setZoneOverlay(int homeId, int zoneId, TadoOverlay overlay) throws TadoException {
+		if (!this.initialized)
+			throw new TadoException("error", "You must initialize the TadoConnector");
+		return _setZoneOverlay(homeId, zoneId, overlay, 0);
+	}
+
+	private TadoOverlay _setZoneOverlay(int homeId, int zoneId, TadoOverlay overlay, int attempt) throws TadoException {
+		TadoOverlay toReturn = null;
+		try {
+			Map<String, String> headers = new HashMap<>();
+			headers.put("Authorization", "Bearer " + this.bearer);
+			headers.put("Content-type", "application/json;charset=UTF-8");
+			String jsonResponse = doPutRequest(
+					"https://my.tado.com/api/v2/homes/" + homeId + "/zones/" + zoneId + "/overlay",
+					overlay.toJSONObject().toString(), headers);
+			debugMessage("setZoneOverlay response: " + jsonResponse);
+			JSONObject json = new JSONObject(jsonResponse);
+			checkException(json);
+			toReturn = parseTadoOverlay(json);
+		} catch (IOException e) {
+			e.printStackTrace();
+			toReturn = null;
+		} catch (TadoException e) {
+			if (attempt > 1) {
+				throw e;
+			} else {
+				refresh();
+				toReturn = _setZoneOverlay(homeId, zoneId, overlay, attempt + 1);
+			}
+		}
+		return toReturn;
+	}
+
+	public void deleteZoneOverlay(TadoZone zone) throws TadoException {
+		deleteZoneOverlay(zone.getHomeId(), zone.getId());
+	}
+
+	public void deleteZoneOverlay(int homeId, int zoneId) throws TadoException {
+		if (!this.initialized)
+			throw new TadoException("error", "You must initialize the TadoConnector");
+		_deleteZoneOverlay(homeId, zoneId, 0);
+	}
+
+	private void _deleteZoneOverlay(int homeId, int zoneId, int attempt) throws TadoException {
+		try {
+			Map<String, String> headers = new HashMap<>();
+			headers.put("Authorization", "Bearer " + this.bearer);
+			headers.put("Content-type", "application/json;charset=UTF-8");
+			String jsonResponse = doDeleteRequest(
+					"https://my.tado.com/api/v2/homes/" + homeId + "/zones/" + zoneId + "/overlay", headers);
+			debugMessage("deleteZoneOverlay response: " + jsonResponse);
+			try {
+				// IF IT CAN PARSE THE JSONOBJECT PROBABLY IT WILL BE AN EXCEPTION BECAUSE THE
+				// DELETE METHOD DOESN'T RETURN ANYTHING
+				JSONObject json = new JSONObject(jsonResponse);
+				checkException(json);
+			} catch (JSONException ignored) {
+
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (TadoException e) {
+			if (attempt > 1) {
+				throw e;
+			} else {
+				refresh();
+				_deleteZoneOverlay(homeId, zoneId, attempt + 1);
+			}
+		}
+	}
+
 	private MobileDevice parseMobileDevice(int homeId, JSONObject device) {
 		JSONObject jsonSettings = device.getJSONObject("settings");
 		Map<String, Object> settings = new HashMap<>();
@@ -1011,6 +1120,41 @@ public class TadoConnector {
 		}
 		return new MobileDevice(homeId, device.optString("name"), device.getInt("id"), settings, location,
 				deviceMetadata);
+	}
+
+	private TadoOverlay parseTadoOverlay(JSONObject json) throws TadoException {
+		JSONObject jsonSetting = json.getJSONObject("setting");
+		Temperature temperature = new Temperature(jsonSetting.getJSONObject("temperature").getDouble("celsius"),
+				jsonSetting.getJSONObject("temperature").getDouble("fahrenheit"));
+		TadoSetting setting = new TadoSetting(jsonSetting.getString("type"),
+				(jsonSetting.getString("power").equals("ON")), temperature);
+		JSONObject jsonTermination = json.getJSONObject("termination");
+		Termination termination;
+		switch (jsonTermination.getString("type")) {
+		case "TIMER": {
+			Date expiry = Date.from(Instant.parse(jsonTermination.optString("expiry")));
+			Date projectedExpiry = Date.from(Instant.parse(jsonTermination.optString("projectedExpiry")));
+			termination = new TimerTermination(jsonTermination.getString("typeSkillBasedApp"),
+					jsonTermination.getInt("durationInSeconds"), expiry,
+					jsonTermination.getInt("remainingTimeInSeconds"), projectedExpiry);
+			break;
+		}
+		case "MANUAL": {
+			Date projectedExpiry = Date.from(Instant.parse(jsonTermination.optString("projectedExpiry")));
+			termination = new ManualTermination(jsonTermination.getString("typeSkillBasedApp"), projectedExpiry);
+			break;
+		}
+		case "TADO_MODE": {
+			Date projectedExpiry = Date.from(Instant.parse(jsonTermination.optString("projectedExpiry")));
+			termination = new ManualTermination(jsonTermination.getString("typeSkillBasedApp"), projectedExpiry);
+			break;
+		}
+		default: {
+			throw new TadoException("error",
+					"The termination type \"" + jsonTermination.getString("type") + "\" is not valid.");
+		}
+		}
+		return new TadoOverlay(json.getString("type"), setting, termination);
 	}
 
 	private void checkException(JSONObject json) throws TadoException {
@@ -1060,6 +1204,16 @@ public class TadoConnector {
 			request = new Request.Builder().url(url).put(body).headers(Headers.of(headers)).build();
 		else
 			request = new Request.Builder().url(url).put(body).build();
+		Response response = client.newCall(request).execute();
+		return response.body().string();
+	}
+
+	private String doDeleteRequest(String url, Map<String, String> headers) throws IOException {
+		Request request;
+		if (headers != null)
+			request = new Request.Builder().url(url).delete().headers(Headers.of(headers)).build();
+		else
+			request = new Request.Builder().url(url).delete().build();
 		Response response = client.newCall(request).execute();
 		return response.body().string();
 	}
