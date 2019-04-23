@@ -1,4 +1,8 @@
 theme: jekyll-theme-minimal
 title: TadoJava
 site.title: TadoJava - Giorgio Bertolotti
+site.github.title: TadoJava - Giorgio Bertolotti
 site.show_downloads: true
+site.github.show_downloads: true
+plugins:
+  - jekyll-sitemap
