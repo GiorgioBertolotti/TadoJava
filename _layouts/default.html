@@ -70,8 +70,8 @@
 				<div class="highlight">
 					<pre class="highlight">
 						<code>
-							<span class="n">TadoConnector</span> <span class="n">connector</span> <span class="o">=</span> <span class="k">new</span> <span class="n">TadoConnector</span><span class="o">(</span><span class="s">"your@email.com"</span><span class="o">,</span> <span class="s">"Password123!"</span><span class="o">);</span>
-							<span class="c1">//TadoConnector connector = new TadoConnector("your@email.com", "Password123!", "clientSecret");</span>
+							TadoConnector connector = new TadoConnector("your@email.com", "Password123!");
+							//TadoConnector connector = new TadoConnector("your@email.com", "Password123!", "clientSecret");
 						</code>
 					</pre>
 				</div>
@@ -86,7 +86,7 @@
 				<div class="highlight">
 					<pre class="highlight">
 						<code>
-							<span class="n">connector</span><span class="o">.</span><span class="na">initialize</span><span class="o">();</span>
+							connector.initialize();
 						</code>
 					</pre>
 				</div>
@@ -96,14 +96,15 @@
 			<p>To build this project I followed <a
 					href="https://shkspr.mobi/blog/2019/02/tado-api-guide-updated-for-2019/">this guide</a>, which perfectly
 				describes Tado’s API. So I’d like to thanks <a href="https://shkspr.mobi/blog/">Terence Eden</a> for his work!
+				<i class="em em-pray"></i>
 			</p>
 		</section>
 		<footer>
 			{% if site.github.is_project_page %}
-			<p>This project is maintained by <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a></p>
+			<p>This project is maintained by <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a>.</p>
 			{% endif %}
 
-			<p class="view"><a href="https://bertolotti.dev/">Visit my WebSite</a></p>
+			<p class="view"><a href="https://bertolotti.dev/">Visit my WebSite!</a></p>
 		</footer>
 	</div>
 	<script src="{{ "/assets/js/scale.fix.js" | relative_url }}"></script>

@@ -21,7 +21,7 @@ $text: #74808a;
 $use-filters: false;
 
 body {
-  font: 18px "Lato", sans-serif;
+  font: 16px "Lato", sans-serif;
 }
 
 h1 {
@@ -71,4 +71,9 @@ footer {
   li {
     width: 100%;
   }
+}
+
+.em {
+  width: 1em;
+  height: 1em;
 }
