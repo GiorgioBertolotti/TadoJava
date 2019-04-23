@@ -36,9 +36,66 @@
 			{% endif %}
 		</header>
 		<section>
-
-			{{ content }}
-
+			<h2>The problem</h2>
+			<p>The problem that gives origin to this project is the fact that the <a
+					href="https://www.tado.com/en/">Tado</a>'s API are very poorly documented and
+				while I was trying to integrate the control of my Tado into my home automation application I wished someone had
+				already developed a library to allow interfacing with the thermostat.</p>
+			<h2>The solution</h2>
+			<p>Unfortunately, no one had yet developed Java libraries to control Tado, so when I
+				had a little more free time I decided to write this library for myself and anyone else who might have the same
+				need as me.</p>
+			<h2>Getting started</h2>
+			<p>
+				To use TadoJava you will need:
+			</p>
+			<ul>
+				<li>A Tado (lol);</li>
+				<li>A Tado account (<a href="https://my.tado.com/webapp/">You can create it here</a>);</li>
+				<li>A client secret (<a href="https://my.tado.com/webapp/env.js">You can get yours here</a>).</li>
+			</ul>
+			<h3>Download</h3>
+			<p>
+				You can download the latest release of TadoJava <a
+					href="https://github.com/GiorgioBertolotti/TadoJava/releases">here</a>.<br />
+				After downloading the <em>.jar</em> file, you can include it in your Java project.
+			</p>
+			<h3>Usage</h3>
+			<p>
+				The <em>Example</em> folder contains an eclipse project with an example on how to use the library.<br />
+				In order to start using TadoJava you can declare a <em>TadoConnector</em> object as follows:
+			</p>
+			<div class="language-java highlighter-rouge">
+				<div class="highlight">
+					<pre class="highlight">
+						<code>
+							<span class="n">TadoConnector</span> <span class="n">connector</span> <span class="o">=</span> <span class="k">new</span> <span class="n">TadoConnector</span><span class="o">(</span><span class="s">"your@email.com"</span><span class="o">,</span> <span class="s">"Password123!"</span><span class="o">);</span>
+							<span class="c1">//TadoConnector connector = new TadoConnector("your@email.com", "Password123!", "clientSecret");</span>
+						</code>
+					</pre>
+				</div>
+			</div>
+			<p>
+				The TadoConnector object will take care of performing HTTP request to Tado’s API, it will also manage the
+				bearer token in all the requests.<br />
+				The very first thing you want to do after declaring your <em>connector</em> is initializing it. This call will
+				perform the requests to retrieve the <em>clientSecret</em> key and the <em>bearer token</em>.
+			</p>
+			<div class="language-java highlighter-rouge">
+				<div class="highlight">
+					<pre class="highlight">
+						<code>
+							<span class="n">connector</span><span class="o">.</span><span class="na">initialize</span><span class="o">();</span>
+						</code>
+					</pre>
+				</div>
+			</div>
+			<p>Now you’re ready to go!</p>
+			<h2>Notes</h2>
+			<p>To build this project I followed <a
+					href="https://shkspr.mobi/blog/2019/02/tado-api-guide-updated-for-2019/">this guide</a>, which perfectly
+				describes Tado’s API. So I’d like to thanks <a href="https://shkspr.mobi/blog/">Terence Eden</a> for his work!
+			</p>
 		</section>
 		<footer>
 			{% if site.github.is_project_page %}

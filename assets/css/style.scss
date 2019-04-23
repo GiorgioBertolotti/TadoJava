@@ -20,6 +20,10 @@ $heading: darken($accent-color, 10%);
 $text: #74808a;
 $use-filters: false;
 
+body {
+  font: 18px "Lato", sans-serif;
+}
+
 h1 {
   a {
     color: darken($accent-color, 10%);
