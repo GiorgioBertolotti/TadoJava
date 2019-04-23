@@ -31,7 +31,8 @@ h1 {
   a:hover {
     color: lighten($accent-color, 10%);
   }
-  a:active {
+  a:active,
+  a:focus {
     color: darken($accent-color, 20%);
   }
 }
@@ -44,7 +45,8 @@ header {
     a:hover {
       color: lighten($accent-color, 10%);
     }
-    a:active {
+    a:active,
+    a:focus {
       color: darken($accent-color, 20%);
     }
   }
@@ -58,8 +60,15 @@ footer {
     a:hover {
       color: lighten($accent-color, 10%);
     }
-    a:active {
+    a:active,
+    a:focus {
       color: darken($accent-color, 20%);
     }
+  }
+}
+
+.downloads {
+  li {
+    width: 100%;
   }
 }

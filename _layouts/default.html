@@ -8,6 +8,7 @@
 
 	{% seo %}
 	<link rel="stylesheet" href="{{ "/assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
+	<link href="https://afeld.github.io/emoji-css/emoji.css" rel="stylesheet">
 	<!--[if lt IE 9]>
 					      <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js"></script>
 					      <![endif]-->
@@ -31,26 +32,26 @@
 
 			{% if site.show_downloads %}
 			<ul class="downloads">
-				<li><a href="{{ site.github.zip_url }}">Download <strong>ZIP File</strong></a></li>
+				<li><a href="https://github.com/GiorgioBertolotti/TadoJava/releases">Download <strong>ZIP File</strong></a></li>
 			</ul>
 			{% endif %}
 		</header>
 		<section>
 			<h2>The problem</h2>
 			<p>The problem that gives origin to this project is the fact that the <a
-					href="https://www.tado.com/en/">Tado</a>'s API are very poorly documented and
+					href="https://www.tado.com/en/">Tado</a>'s API are very poorly documented (<i class="em em-sleepy"></i>) and
 				while I was trying to integrate the control of my Tado into my home automation application I wished someone had
 				already developed a library to allow interfacing with the thermostat.</p>
 			<h2>The solution</h2>
 			<p>Unfortunately, no one had yet developed Java libraries to control Tado, so when I
 				had a little more free time I decided to write this library for myself and anyone else who might have the same
-				need as me.</p>
+				need as me. <i class="em em-muscle"></i></p>
 			<h2>Getting started</h2>
 			<p>
 				To use TadoJava you will need:
 			</p>
 			<ul>
-				<li>A Tado (lol);</li>
+				<li>A Tado (<i class="em em-upside_down_face"></i>);</li>
 				<li>A Tado account (<a href="https://my.tado.com/webapp/">You can create it here</a>);</li>
 				<li>A client secret (<a href="https://my.tado.com/webapp/env.js">You can get yours here</a>).</li>
 			</ul>
@@ -90,7 +91,7 @@
 					</pre>
 				</div>
 			</div>
-			<p>Now you’re ready to go!</p>
+			<p>Now you’re ready to go! <i class="em em-airplane_departure"></i></p>
 			<h2>Notes</h2>
 			<p>To build this project I followed <a
 					href="https://shkspr.mobi/blog/2019/02/tado-api-guide-updated-for-2019/">this guide</a>, which perfectly
