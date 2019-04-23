@@ -21,7 +21,23 @@ $text: #74808a;
 $use-filters: false;
 
 h1 {
-	a {
-		color: darken($accent-color, 10%);
-	}
+  a {
+    color: darken($accent-color, 10%);
+  }
+}
+
+header {
+  p {
+    a {
+      color: darken($accent-color, 10%);
+    }
+  }
+}
+
+footer {
+  p {
+    a {
+      color: darken($accent-color, 10%);
+    }
+  }
 }
