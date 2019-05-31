@@ -86,6 +86,8 @@ public class TadoConnector {
 		return refreshToken;
 	}
 
+	// Get requests
+
 	private String getClientSecret() {
 		try {
 			String jsonResponse = doGetRequest("https://my.tado.com/webapp/env.js", null);
@@ -945,6 +947,8 @@ public class TadoConnector {
 		return toReturn;
 	}
 
+	// Put requests
+
 	public boolean setGeoTracking(MobileDevice device, boolean enabled) throws TadoException {
 		return setGeoTracking(device.getHomeId(), device.getId(), enabled);
 	}
@@ -1059,6 +1063,48 @@ public class TadoConnector {
 		}
 		return toReturn;
 	}
+
+	public boolean setHomeState(TadoHome home, TadoState state) throws TadoException {
+		return setHomeState(home.getId(), state.getPresence());
+	}
+
+	public boolean setHomeState(int homeId, String presence) throws TadoException {
+		if (!this.initialized)
+			throw new TadoException("error", "You must initialize the TadoConnector");
+		return _setHomeState(homeId, presence, 0);
+	}
+
+	private boolean _setHomeState(int homeId, String presence, int attempt) throws TadoException {
+		boolean toReturn = false;
+		try {
+			Map<String, String> headers = new HashMap<>();
+			headers.put("Authorization", "Bearer " + this.bearer);
+			headers.put("Content-type", "application/json;charset=UTF-8");
+			JSONObject toPut = new JSONObject();
+			toPut.put("homePresence", presence);
+			String jsonResponse = doPutRequest("https://my.tado.com/api/v2/homes/" + homeId + "/presence",
+					toPut.toString(), headers);
+			if (jsonResponse != null && !jsonResponse.trim().isEmpty()) {
+				JSONObject json = new JSONObject(jsonResponse);
+				checkException(json);
+			}
+			debugMessage("setHomeState response: " + jsonResponse);
+			toReturn = true;
+		} catch (IOException e) {
+			e.printStackTrace();
+			toReturn = false;
+		} catch (TadoException e) {
+			if (attempt > 1) {
+				throw e;
+			} else {
+				refresh();
+				toReturn = _setHomeState(homeId, presence, attempt + 1);
+			}
+		}
+		return toReturn;
+	}
+
+	// Delete requests
 
 	public void deleteZoneOverlay(TadoZone zone) throws TadoException {
 		deleteZoneOverlay(zone.getHomeId(), zone.getId());

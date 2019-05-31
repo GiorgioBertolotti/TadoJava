@@ -5,8 +5,10 @@ public class TadoState {
 		return presence;
 	}
 
-	public TadoState(String presence) {
+	public TadoState(String presence) throws TadoException {
 		super();
+		if (presence == null || (!presence.equals("AWAY") && !presence.equals("HOME")))
+			throw new TadoException("error", "Presence value can only be HOME or AWAY.");
 		this.presence = presence;
 	}
 

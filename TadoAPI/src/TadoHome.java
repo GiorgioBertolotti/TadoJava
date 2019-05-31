@@ -146,6 +146,10 @@ public class TadoHome {
 		return connector.setGeoTracking(this.id, deviceId, enabled);
 	}
 
+	public boolean setState(TadoState state, TadoConnector connector) throws TadoException {
+		return connector.setHomeState(this.id, state.getPresence());
+	}
+
 	@Override
 	public String toString() {
 		return "TadoHome [id=" + id + ", name=" + name + ", dateTimeZone=" + dateTimeZone + ", dateCreated="

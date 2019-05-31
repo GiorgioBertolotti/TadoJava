@@ -7,6 +7,11 @@ public class HomeID {
 			for (TadoHome home : connector.getHomes()) {
 				System.out.println(home.toString());
 				System.out.println(home.getState(connector));
+				try {
+					System.out.println(home.setState(new TadoState("AWAY"), connector));
+				} catch (TadoException e) {
+					e.printStackTrace();
+				}
 				System.out.println(home.getWeather(connector));
 				System.out.println("ZONES:");
 				for (TadoZone zone : home.getZones(connector)) {
