@@ -1,3 +1,13 @@
+import dev.bertolotti.tadojava.MobileDevice;
+import dev.bertolotti.tadojava.TadoConnector;
+import dev.bertolotti.tadojava.TadoDevice;
+import dev.bertolotti.tadojava.TadoException;
+import dev.bertolotti.tadojava.TadoHome;
+import dev.bertolotti.tadojava.TadoInstallation;
+import dev.bertolotti.tadojava.TadoState;
+import dev.bertolotti.tadojava.TadoZone;
+import dev.bertolotti.tadojava.User;
+
 public class HomeID {
 	public static void main(String[] args) {
 		try {
