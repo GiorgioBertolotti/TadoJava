@@ -1,0 +1,32 @@
+os: linux
+language: java
+dist: xenial
+sudo: false
+
+before-script:
+  - cd $TRAVIS_BUILD_DIR/TadoAPI/  
+
+build: &build_jar
+  name: "Build JAR"
+  language: java
+  script:
+    - if [ -n "$TRAVIS_TAG" ]; then mvn versions:set -DnewVersion="$TRAVIS_TAG"; fi
+    - mvn package shade:shade
+  deploy:
+    - provider: releases
+      api_key: $GITHUB_TOKEN
+      file: $TRAVIS_BUILD_DIR/TadoAPI/target/TadoAPI-$TRAVIS_TAG.jar
+      skip_cleanup: true
+      name: TadoAPI-$TRAVIS_TAG.jar
+      on:
+        tags: true
+
+jobs:
+  include:
+  - stage: test
+  - stage: build
+    <<: *build_jar
+
+cache:
+  directories:
+  - "$HOME/.pub-cache"
