@@ -3,8 +3,17 @@ language: java
 dist: xenial
 sudo: false
 
+before-install:
+  - cd $TRAVIS_BUILD_DIR/TadoAPI/
+
+install:
+  - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+
 before-script:
-  - cd $TRAVIS_BUILD_DIR/TadoAPI/  
+  - cd $TRAVIS_BUILD_DIR/TadoAPI/
+
+script:
+  - mvn test -B
 
 build: &build_jar
   name: "Build JAR"
